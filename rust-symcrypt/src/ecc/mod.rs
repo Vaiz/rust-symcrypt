@@ -89,7 +89,7 @@ impl Drop for InnerEcKey {
         unsafe {
             // SAFETY: FFI calls to free the resource if it has been allocated.
             if self.0 != null_mut() {
-                symcrypt_sys::SymCryptEckeyFree(self.0);
+                symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeyFree(self.0);
             }
         }
     }
@@ -112,7 +112,7 @@ impl Drop for InnerEcCurve {
         unsafe {
             // SAFETY: FFI calls
             if self.0 != null_mut() {
-                symcrypt_sys::SymCryptEcurveFree(self.0);
+                symcrypt_sys::symcrypt_lib().unwrap().SymCryptEcurveFree(self.0);
             }
         }
     }
@@ -180,12 +180,12 @@ impl EcKey {
         unsafe {
             // SAFETY: FFI calls
             // Stack allocated since we will do SymCryptEckeyAllocate.
-            let key_ptr = InnerEcKey(symcrypt_sys::SymCryptEckeyAllocate(ec_curve.0));
+            let key_ptr = InnerEcKey(symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeyAllocate(ec_curve.0));
             if key_ptr.0.is_null() {
                 return Err(SymCryptError::MemoryAllocationFailure);
             }
 
-            match symcrypt_sys::SymCryptEckeySetRandom(ec_key_usage.to_symcrypt_flag(), key_ptr.0) {
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeySetRandom(ec_key_usage.to_symcrypt_flag(), key_ptr.0) {
                 symcrypt_sys::SYMCRYPT_ERROR_SYMCRYPT_NO_ERROR => {
                     let key = EcKey {
                         inner_key: key_ptr,
@@ -221,7 +221,7 @@ impl EcKey {
         unsafe {
             //SAFETY: FFI calls
             // Stack allocated since we will do SymCryptEckeyAllocate.
-            let key_ptr = InnerEcKey(symcrypt_sys::SymCryptEckeyAllocate(ec_curve.0));
+            let key_ptr = InnerEcKey(symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeyAllocate(ec_curve.0));
 
             if key_ptr.0.is_null() {
                 return Err(SymCryptError::MemoryAllocationFailure);
@@ -232,7 +232,7 @@ impl EcKey {
                 None => (ptr::null(), 0),
             };
 
-            match symcrypt_sys::SymCryptEckeySetValue(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeySetValue(
                 private_key.as_ptr(),
                 private_key.len() as symcrypt_sys::SIZE_T,
                 public_key_ptr,
@@ -274,12 +274,12 @@ impl EcKey {
         unsafe {
             // SAFETY: FFI calls
             // Stack allocated since we will do SymCryptEckeyAllocate.
-            let key_ptr = InnerEcKey(symcrypt_sys::SymCryptEckeyAllocate(ec_curve.0));
+            let key_ptr = InnerEcKey(symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeyAllocate(ec_curve.0));
             if key_ptr.0.is_null() {
                 return Err(SymCryptError::MemoryAllocationFailure);
             }
 
-            match symcrypt_sys::SymCryptEckeySetValue(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeySetValue(
                 std::ptr::null(), // private key set to null since none is generated
                 0,
                 public_key.as_ptr(), // only a public key is attached
@@ -311,10 +311,10 @@ impl EcKey {
         unsafe {
             // SAFETY: FFI calls
             let pub_key_len =
-                symcrypt_sys::SymCryptEckeySizeofPublicKey(self.inner_key(), ec_point_format);
+                symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeySizeofPublicKey(self.inner_key(), ec_point_format);
 
             let mut pub_key_bytes = vec![0u8; pub_key_len as usize];
-            match symcrypt_sys::SymCryptEckeyGetValue(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeyGetValue(
                 self.inner_key(),
                 std::ptr::null_mut(), // setting private key to null since we will only access public key
                 0 as symcrypt_sys::SIZE_T,
@@ -338,10 +338,10 @@ impl EcKey {
 
         unsafe {
             // SAFETY: FFI calls
-            let pub_key_len = symcrypt_sys::SymCryptEckeySizeofPrivateKey(self.inner_key());
+            let pub_key_len = symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeySizeofPrivateKey(self.inner_key());
 
             let mut private_key_bytes = vec![0u8; pub_key_len as usize];
-            match symcrypt_sys::SymCryptEckeyGetValue(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeyGetValue(
                 self.inner_key(),
                 private_key_bytes.as_mut_ptr(),
                 pub_key_len as symcrypt_sys::SIZE_T,
@@ -386,7 +386,7 @@ impl EcKey {
     pub fn get_curve_size(&self) -> u32 {
         unsafe {
             let ec_curve = InnerEcCurve::new(self.get_curve_type());
-            let curve_size = symcrypt_sys::SymCryptEcurveSizeofFieldElement(ec_curve.0);
+            let curve_size = symcrypt_sys::symcrypt_lib().unwrap().SymCryptEcurveSizeofFieldElement(ec_curve.0);
             curve_size
         }
     }
@@ -396,7 +396,7 @@ impl EcKey {
     pub fn get_size_of_private_key(&self) -> u32 {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptEckeySizeofPrivateKey(self.inner_key())
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeySizeofPrivateKey(self.inner_key())
         }
     }
 
@@ -405,7 +405,7 @@ impl EcKey {
     pub fn get_size_of_public_key(&self) -> u32 {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptEckeySizeofPublicKey(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptEckeySizeofPublicKey(
                 self.inner_key(),
                 curve_to_ec_point_format(self.get_curve_type()),
             )
@@ -430,7 +430,7 @@ fn internal_new(curve: CurveType) -> Result<InnerEcCurve, SymCryptError> {
         symcrypt_init();
 
         // Stack allocated since SymCryptEcCurveAllocate is called.
-        let curve_ptr = symcrypt_sys::SymCryptEcurveAllocate(to_symcrypt_curve(curve), 0);
+        let curve_ptr = symcrypt_sys::symcrypt_lib().unwrap().SymCryptEcurveAllocate(to_symcrypt_curve(curve), 0);
         if curve_ptr.is_null() {
             return Err(SymCryptError::MemoryAllocationFailure);
         }

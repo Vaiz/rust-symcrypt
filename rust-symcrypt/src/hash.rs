@@ -75,6 +75,7 @@ use std::marker::PhantomPinned;
 use std::mem;
 use std::pin::Pin;
 use symcrypt_sys;
+use symcrypt_sys::symcrypt_lib;
 
 /// 16
 #[cfg(feature = "md5")]
@@ -213,7 +214,7 @@ impl Md5State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptMd5Init(instance.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptMd5Init(instance.get_inner_mut());
         }
         instance
     }
@@ -239,7 +240,7 @@ impl HashState for Md5State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptMd5Append(
+            symcrypt_lib().unwrap().SymCryptMd5Append(
                 self.get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -251,7 +252,7 @@ impl HashState for Md5State {
         let mut result = [0u8; MD5_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptMd5Result(self.get_inner_mut(), result.as_mut_ptr());
+            symcrypt_lib().unwrap().SymCryptMd5Result(self.get_inner_mut(), result.as_mut_ptr());
         }
         result
     }
@@ -270,7 +271,7 @@ impl Clone for Md5State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptMd5StateCopy(self.get_inner(), new_state.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptMd5StateCopy(self.get_inner(), new_state.get_inner_mut());
         }
         new_state
     }
@@ -281,7 +282,7 @@ impl Drop for Md5State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().unwrap().SymCryptWipe(
                 self.get_inner_mut() as *mut c_void,
                 mem::size_of_val(&*self.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -299,7 +300,7 @@ pub fn md5(data: &[u8]) -> [u8; MD5_RESULT_SIZE] {
     let mut result = [0; MD5_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptMd5(
+        symcrypt_lib().unwrap().SymCryptMd5(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),
@@ -338,7 +339,7 @@ impl Sha1State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha1Init(instance.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha1Init(instance.get_inner_mut());
         }
         instance
     }
@@ -364,7 +365,7 @@ impl HashState for Sha1State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha1Append(
+            symcrypt_lib().unwrap().SymCryptSha1Append(
                 self.get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -376,7 +377,7 @@ impl HashState for Sha1State {
         let mut result = [0u8; SHA1_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha1Result(self.get_inner_mut(), result.as_mut_ptr());
+            symcrypt_lib().unwrap().SymCryptSha1Result(self.get_inner_mut(), result.as_mut_ptr());
         }
         result
     }
@@ -395,7 +396,7 @@ impl Clone for Sha1State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha1StateCopy(self.get_inner(), new_state.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha1StateCopy(self.get_inner(), new_state.get_inner_mut());
         }
         new_state
     }
@@ -406,7 +407,7 @@ impl Drop for Sha1State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().unwrap().SymCryptWipe(
                 self.get_inner_mut() as *mut c_void,
                 mem::size_of_val(&*self.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -424,7 +425,7 @@ pub fn sha1(data: &[u8]) -> [u8; SHA1_RESULT_SIZE] {
     let mut result = [0; SHA1_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha1(
+        symcrypt_lib().unwrap().SymCryptSha1(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),
@@ -460,7 +461,7 @@ impl Sha256State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha256Init(instance.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha256Init(instance.get_inner_mut());
         }
         instance
     }
@@ -485,7 +486,7 @@ impl HashState for Sha256State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha256Append(
+            symcrypt_lib().unwrap().SymCryptSha256Append(
                 self.get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -497,7 +498,7 @@ impl HashState for Sha256State {
         let mut result = [0u8; SHA256_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha256Result(self.get_inner_mut(), result.as_mut_ptr());
+            symcrypt_lib().unwrap().SymCryptSha256Result(self.get_inner_mut(), result.as_mut_ptr());
         }
         result
     }
@@ -515,7 +516,7 @@ impl Clone for Sha256State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha256StateCopy(self.get_inner(), new_state.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha256StateCopy(self.get_inner(), new_state.get_inner_mut());
         }
         new_state
     }
@@ -525,7 +526,7 @@ impl Drop for Sha256State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().unwrap().SymCryptWipe(
                 self.get_inner_mut() as *mut c_void,
                 mem::size_of_val(&*self.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -542,7 +543,7 @@ pub fn sha256(data: &[u8]) -> [u8; SHA256_RESULT_SIZE] {
     let mut result = [0; SHA256_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha256(
+        symcrypt_lib().unwrap().SymCryptSha256(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),
@@ -578,7 +579,7 @@ impl Sha384State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha384Init(instance.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha384Init(instance.get_inner_mut());
         }
         instance
     }
@@ -603,7 +604,7 @@ impl HashState for Sha384State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha384Append(
+            symcrypt_lib().unwrap().SymCryptSha384Append(
                 self.get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -615,7 +616,7 @@ impl HashState for Sha384State {
         let mut result = [0u8; SHA384_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha384Result(self.get_inner_mut(), result.as_mut_ptr());
+            symcrypt_lib().unwrap().SymCryptSha384Result(self.get_inner_mut(), result.as_mut_ptr());
         }
         result
     }
@@ -633,7 +634,7 @@ impl Clone for Sha384State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha384StateCopy(self.get_inner(), new_state.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha384StateCopy(self.get_inner(), new_state.get_inner_mut());
         }
         new_state
     }
@@ -643,7 +644,7 @@ impl Drop for Sha384State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().unwrap().SymCryptWipe(
                 self.get_inner_mut() as *mut c_void,
                 mem::size_of_val(&*self.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -660,7 +661,7 @@ pub fn sha384(data: &[u8]) -> [u8; SHA384_RESULT_SIZE] {
     let mut result = [0; SHA384_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha384(
+        symcrypt_lib().unwrap().SymCryptSha384(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),
@@ -696,7 +697,7 @@ impl Sha512State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha512Init(instance.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha512Init(instance.get_inner_mut());
         }
         instance
     }
@@ -721,7 +722,7 @@ impl HashState for Sha512State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha512Append(
+            symcrypt_lib().unwrap().SymCryptSha512Append(
                 self.get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -733,7 +734,7 @@ impl HashState for Sha512State {
         let mut result = [0u8; SHA512_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha512Result(self.get_inner_mut(), result.as_mut_ptr());
+            symcrypt_lib().unwrap().SymCryptSha512Result(self.get_inner_mut(), result.as_mut_ptr());
         }
         result
     }
@@ -751,7 +752,7 @@ impl Clone for Sha512State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha512StateCopy(self.get_inner(), new_state.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha512StateCopy(self.get_inner(), new_state.get_inner_mut());
         }
         new_state
     }
@@ -761,7 +762,7 @@ impl Drop for Sha512State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().unwrap().SymCryptWipe(
                 self.get_inner_mut() as *mut c_void,
                 mem::size_of_val(&*self.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -778,7 +779,7 @@ pub fn sha512(data: &[u8]) -> [u8; SHA512_RESULT_SIZE] {
     let mut result = [0; SHA512_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha512(
+        symcrypt_lib().unwrap().SymCryptSha512(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),
@@ -814,7 +815,7 @@ impl Sha3_256State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_256Init(instance.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha3_256Init(instance.get_inner_mut());
         }
         instance
     }
@@ -839,7 +840,7 @@ impl HashState for Sha3_256State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_256Append(
+            symcrypt_lib().unwrap().SymCryptSha3_256Append(
                 self.get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -851,7 +852,7 @@ impl HashState for Sha3_256State {
         let mut result = [0u8; SHA3_256_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_256Result(self.get_inner_mut(), result.as_mut_ptr());
+            symcrypt_lib().unwrap().SymCryptSha3_256Result(self.get_inner_mut(), result.as_mut_ptr());
         }
         result
     }
@@ -869,7 +870,7 @@ impl Clone for Sha3_256State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_256StateCopy(self.get_inner(), new_state.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha3_256StateCopy(self.get_inner(), new_state.get_inner_mut());
         }
         new_state
     }
@@ -879,7 +880,7 @@ impl Drop for Sha3_256State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().unwrap().SymCryptWipe(
                 self.get_inner_mut() as *mut c_void,
                 mem::size_of_val(&*self.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -896,7 +897,7 @@ pub fn sha3_256(data: &[u8]) -> [u8; SHA3_256_RESULT_SIZE] {
     let mut result = [0; SHA3_256_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha3_256(
+        symcrypt_lib().unwrap().SymCryptSha3_256(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),
@@ -932,7 +933,7 @@ impl Sha3_384State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_384Init(instance.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha3_384Init(instance.get_inner_mut());
         }
         instance
     }
@@ -957,7 +958,7 @@ impl HashState for Sha3_384State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_384Append(
+            symcrypt_lib().unwrap().SymCryptSha3_384Append(
                 self.get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -969,7 +970,7 @@ impl HashState for Sha3_384State {
         let mut result = [0u8; SHA3_384_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_384Result(self.get_inner_mut(), result.as_mut_ptr());
+            symcrypt_lib().unwrap().SymCryptSha3_384Result(self.get_inner_mut(), result.as_mut_ptr());
         }
         result
     }
@@ -987,7 +988,7 @@ impl Clone for Sha3_384State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_384StateCopy(self.get_inner(), new_state.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha3_384StateCopy(self.get_inner(), new_state.get_inner_mut());
         }
         new_state
     }
@@ -997,7 +998,7 @@ impl Drop for Sha3_384State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().unwrap().SymCryptWipe(
                 self.get_inner_mut() as *mut c_void,
                 mem::size_of_val(&*self.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -1014,7 +1015,7 @@ pub fn sha3_384(data: &[u8]) -> [u8; SHA3_384_RESULT_SIZE] {
     let mut result = [0; SHA3_384_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha3_384(
+        symcrypt_lib().unwrap().SymCryptSha3_384(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),
@@ -1050,7 +1051,7 @@ impl Sha3_512State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_512Init(instance.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha3_512Init(instance.get_inner_mut());
         }
         instance
     }
@@ -1075,7 +1076,7 @@ impl HashState for Sha3_512State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_512Append(
+            symcrypt_lib().unwrap().SymCryptSha3_512Append(
                 self.get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -1087,7 +1088,7 @@ impl HashState for Sha3_512State {
         let mut result = [0u8; SHA3_512_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_512Result(self.get_inner_mut(), result.as_mut_ptr());
+            symcrypt_lib().unwrap().SymCryptSha3_512Result(self.get_inner_mut(), result.as_mut_ptr());
         }
         result
     }
@@ -1105,7 +1106,7 @@ impl Clone for Sha3_512State {
         }));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha3_512StateCopy(self.get_inner(), new_state.get_inner_mut());
+            symcrypt_lib().unwrap().SymCryptSha3_512StateCopy(self.get_inner(), new_state.get_inner_mut());
         }
         new_state
     }
@@ -1115,7 +1116,7 @@ impl Drop for Sha3_512State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().unwrap().SymCryptWipe(
                 self.get_inner_mut() as *mut c_void,
                 mem::size_of_val(&*self.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -1132,7 +1133,7 @@ pub fn sha3_512(data: &[u8]) -> [u8; SHA3_512_RESULT_SIZE] {
     let mut result = [0; SHA3_512_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha3_512(
+        symcrypt_lib().unwrap().SymCryptSha3_512(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),

@@ -76,6 +76,7 @@
 //!
 use crate::errors::SymCryptError;
 use symcrypt_sys;
+use symcrypt_sys::symcrypt_lib;
 
 /// Stateless call to encrypt using ChaChaPoly1305.
 ///
@@ -103,7 +104,7 @@ pub fn chacha20_poly1305_encrypt_in_place(
 ) -> Result<(), SymCryptError> {
     unsafe {
         // SAFETY: FFI calls
-        match symcrypt_sys::SymCryptChaCha20Poly1305Encrypt(
+        match symcrypt_lib().unwrap().SymCryptChaCha20Poly1305Encrypt(
             key.as_ptr(),
             key.len() as symcrypt_sys::SIZE_T,
             nonce.as_ptr(),
@@ -148,7 +149,7 @@ pub fn chacha20_poly1305_decrypt_in_place(
 ) -> Result<(), SymCryptError> {
     unsafe {
         // SAFETY: FFI calls
-        match symcrypt_sys::SymCryptChaCha20Poly1305Decrypt(
+        match symcrypt_lib().unwrap().SymCryptChaCha20Poly1305Decrypt(
             key.as_ptr(),
             key.len() as symcrypt_sys::SIZE_T,
             nonce.as_ptr(),

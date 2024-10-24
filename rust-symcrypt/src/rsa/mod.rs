@@ -68,6 +68,7 @@
 use crate::errors::SymCryptError;
 use crate::NumberFormat;
 use std::ptr;
+use symcrypt_sys::symcrypt_lib;
 
 pub mod oaep;
 pub mod pkcs1;
@@ -82,7 +83,7 @@ impl Drop for InnerRsaKey {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptRsakeyFree(self.0);
+            symcrypt_lib().unwrap().SymCryptRsakeyFree(self.0);
         }
     }
 }
@@ -174,7 +175,7 @@ impl RsaKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsakeyGenerate(
+            match symcrypt_lib().unwrap().SymCryptRsakeyGenerate(
                 rsa_key.0,
                 pub_exp_ptr,   // Pointer to the public exponent array or null.
                 pub_exp_count, // Count of public exponents. Will be 1 if Some() is provided, else 0.
@@ -220,7 +221,7 @@ impl RsaKey {
         .as_mut_ptr();
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsakeySetValue(
+            match symcrypt_lib().unwrap().SymCryptRsakeySetValue(
                 modulus_buffer.as_ptr(),
                 modulus_buffer.len() as symcrypt_sys::SIZE_T,
                 [u64_pub_exp].as_ptr(),    // This array has a length of 1.
@@ -261,7 +262,7 @@ impl RsaKey {
         unsafe {
             // SAFETY: FFI calls
             // When only setting the public key, ppPrimes, pcbPrimes and nPrimes can be NULL, NULL and 0
-            match symcrypt_sys::SymCryptRsakeySetValue(
+            match symcrypt_lib().unwrap().SymCryptRsakeySetValue(
                 modulus_buffer.as_ptr(),
                 modulus_buffer.len() as symcrypt_sys::SIZE_T,
                 [u64_pub_exp].as_ptr(), // This array has a length of 1.
@@ -316,7 +317,7 @@ impl RsaKey {
 
         unsafe {
             // SAFETY: FFI calls
-            let result = symcrypt_sys::SymCryptRsakeyGetValue(
+            let result = symcrypt_lib().unwrap().SymCryptRsakeyGetValue(
                 self.inner.0,
                 modulus_buffer.as_mut_ptr(),
                 modulus_buffer.len() as symcrypt_sys::SIZE_T,
@@ -332,7 +333,7 @@ impl RsaKey {
                 return Err(result.into());
             }
 
-            let result = symcrypt_sys::SymCryptRsakeyGetCrtValue(
+            let result = symcrypt_lib().unwrap().SymCryptRsakeyGetCrtValue(
                 self.inner.0,
                 [d_p.as_mut_ptr(), d_q.as_mut_ptr()].as_mut_ptr(),
                 crt_lens.as_mut_ptr(),
@@ -370,7 +371,7 @@ impl RsaKey {
         unsafe {
             // SAFETY: FFI calls
             // When only getting the public key, ppPrimes, pcbPrimes and nPrimes can be NULL, NULL and 0.
-            match symcrypt_sys::SymCryptRsakeyGetValue(
+            match symcrypt_lib().unwrap().SymCryptRsakeyGetValue(
                 self.inner.0,
                 modulus_buffer.as_mut_ptr(),
                 modulus_buffer.len() as symcrypt_sys::SIZE_T,
@@ -406,8 +407,8 @@ impl RsaKey {
         unsafe {
             // SAFETY: FFI calls
             // Currently, only two prime RSA is supported, i.e. the only valid indexes are 0 and 1
-            let prime_1 = symcrypt_sys::SymCryptRsakeySizeofPrime(self.inner.0, 0);
-            let prime_2 = symcrypt_sys::SymCryptRsakeySizeofPrime(self.inner.0, 1);
+            let prime_1 = symcrypt_lib().unwrap().SymCryptRsakeySizeofPrime(self.inner.0, 0);
+            let prime_2 = symcrypt_lib().unwrap().SymCryptRsakeySizeofPrime(self.inner.0, 1);
             (prime_1, prime_2)
         }
     }
@@ -417,7 +418,7 @@ impl RsaKey {
     pub fn get_size_of_modulus(&self) -> u32 {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptRsakeySizeofModulus(self.inner.0)
+            symcrypt_lib().unwrap().SymCryptRsakeySizeofModulus(self.inner.0)
         }
     }
 
@@ -427,7 +428,7 @@ impl RsaKey {
         unsafe {
             // SAFETY: FFI calls
             // Only one public exponent is supported, so the only valid index is 0.
-            symcrypt_sys::SymCryptRsakeySizeofPublicExponent(self.inner.0, 0)
+            symcrypt_lib().unwrap().SymCryptRsakeySizeofPublicExponent(self.inner.0, 0)
         }
     }
 
@@ -455,7 +456,7 @@ fn allocate_rsa(
     };
     unsafe {
         // SAFETY: FFI calls
-        let result = symcrypt_sys::SymCryptRsakeyAllocate(&rsa_params, 0);
+        let result = symcrypt_lib().unwrap().SymCryptRsakeyAllocate(&rsa_params, 0);
         if result == ptr::null_mut() {
             return Err(SymCryptError::AuthenticationFailure);
         }
@@ -468,7 +469,7 @@ fn store_msb_first_u64(value: u64, size: u32) -> Result<Vec<u8>, SymCryptError> 
     let mut dst = vec![0u8; size as usize]; // Allocate tight size in bytes for storing public exponent
     unsafe {
         // SAFETY: FFI calls
-        match symcrypt_sys::SymCryptStoreMsbFirstUint64(value, dst.as_mut_ptr(), size as u64) {
+        match symcrypt_lib().unwrap().SymCryptStoreMsbFirstUint64(value, dst.as_mut_ptr(), size as u64) {
             symcrypt_sys::SYMCRYPT_ERROR_SYMCRYPT_NO_ERROR => Ok(dst),
             err => Err(SymCryptError::from(err)),
         }
@@ -480,7 +481,7 @@ fn load_msb_first_u64(src: &[u8]) -> Result<u64, SymCryptError> {
     let mut dst = 0u64;
     unsafe {
         // SAFETY: FFI calls
-        match symcrypt_sys::SymCryptLoadMsbFirstUint64(
+        match symcrypt_lib().unwrap().SymCryptLoadMsbFirstUint64(
             src.as_ptr(),
             src.len() as u64,
             &mut dst as *mut u64,

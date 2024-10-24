@@ -51,7 +51,7 @@ impl RsaKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsaOaepDecrypt(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptRsaOaepDecrypt(
                 self.inner(),
                 encrypted_message.as_ptr(),
                 encrypted_message.len() as symcrypt_sys::SIZE_T,
@@ -96,7 +96,7 @@ impl RsaKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsaOaepEncrypt(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptRsaOaepEncrypt(
                 self.inner(),
                 message.as_ptr(),
                 message.len() as symcrypt_sys::SIZE_T,

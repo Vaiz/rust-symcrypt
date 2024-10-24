@@ -24,7 +24,7 @@ Then you can call the underlying SymCrypt code directly via the FFIs.
 ```Rust
 unsafe {
     // SAFETY: FFI calls
-	symcrypt_sys::SymCryptSha384(
+	symcrypt_sys::symcrypt_lib().unwrap().SymCryptSha384(
 	data.as_ptr(),
 	data.len() as  symcrypt_sys::SIZE_T,
 	result.as_mut_ptr(),

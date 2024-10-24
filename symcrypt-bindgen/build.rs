@@ -16,6 +16,7 @@ fn main() {
 
     let bindings = bindgen::Builder::default()
         .header("inc/wrapper.h")
+        .dynamic_library_name("symcrypt")
         .clang_arg("-v")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         // ALLOWLIST

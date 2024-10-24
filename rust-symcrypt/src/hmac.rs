@@ -134,7 +134,7 @@ impl HmacMd5ExpandedKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptHmacMd5ExpandKey(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacMd5ExpandKey(
                 &mut expanded_key.as_mut().get_unchecked_mut().inner,
                 key.as_ptr(),
                 key.len() as symcrypt_sys::SIZE_T,
@@ -157,7 +157,7 @@ impl Drop for HmacMd5ExpandedKey {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 ptr::addr_of_mut!(self.inner) as *mut c_void,
                 mem::size_of_val(&mut self.inner) as symcrypt_sys::SIZE_T,
             );
@@ -228,7 +228,7 @@ impl HmacMd5State {
 
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacMd5Init(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacMd5Init(
                 inner_state.as_mut().get_inner_mut(),
                 expanded_key.get_inner(),
             );
@@ -248,7 +248,7 @@ impl HmacState for HmacMd5State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacMd5Append(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacMd5Append(
                 self.state.as_mut().get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -260,7 +260,7 @@ impl HmacState for HmacMd5State {
         let mut result = [0u8; MD5_HMAC_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacMd5Result(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacMd5Result(
                 self.state.as_mut().get_inner_mut(),
                 result.as_mut_ptr(),
             );
@@ -281,7 +281,7 @@ impl Clone for HmacMd5State {
         };
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacMd5StateCopy(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacMd5StateCopy(
                 self.state.get_inner(),
                 new_state.key.get_inner(), // Use new ref counted key.
                 new_state.state.as_mut().get_inner_mut(),
@@ -296,7 +296,7 @@ impl Drop for HmacMd5State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 self.state.as_mut().get_inner_mut() as *mut c_void,
                 mem::size_of_val(&mut self.state.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -317,13 +317,13 @@ pub fn hmac_md5(key: &[u8], data: &[u8]) -> Result<[u8; MD5_HMAC_RESULT_SIZE], S
     unsafe {
         // SAFETY: FFI calls
         let mut expanded_key = HmacMd5ExpandedKey::new(key)?;
-        match symcrypt_sys::SymCryptHmacMd5ExpandKey(
+        match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacMd5ExpandKey(
             &mut expanded_key.as_mut().get_unchecked_mut().inner,
             key.as_ptr(),
             key.len() as symcrypt_sys::SIZE_T,
         ) {
             symcrypt_sys::SYMCRYPT_ERROR_SYMCRYPT_NO_ERROR => {
-                symcrypt_sys::SymCryptHmacMd5(
+                symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacMd5(
                     &mut expanded_key.as_mut().get_unchecked_mut().inner,
                     data.as_ptr(),
                     data.len() as symcrypt_sys::SIZE_T,
@@ -359,7 +359,7 @@ impl HmacSha1ExpandedKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptHmacSha1ExpandKey(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha1ExpandKey(
                 &mut expanded_key.as_mut().get_unchecked_mut().inner,
                 key.as_ptr(),
                 key.len() as symcrypt_sys::SIZE_T,
@@ -382,7 +382,7 @@ impl Drop for HmacSha1ExpandedKey {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 ptr::addr_of_mut!(self.inner) as *mut c_void,
                 mem::size_of_val(&mut self.inner) as symcrypt_sys::SIZE_T,
             );
@@ -452,7 +452,7 @@ impl HmacSha1State {
 
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha1Init(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha1Init(
                 inner_state.as_mut().get_inner_mut(),
                 expanded_key.get_inner(),
             );
@@ -472,7 +472,7 @@ impl HmacState for HmacSha1State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha1Append(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha1Append(
                 self.state.as_mut().get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -484,7 +484,7 @@ impl HmacState for HmacSha1State {
         let mut result = [0u8; SHA1_HMAC_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha1Result(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha1Result(
                 self.state.as_mut().get_inner_mut(),
                 result.as_mut_ptr(),
             );
@@ -505,7 +505,7 @@ impl Clone for HmacSha1State {
         };
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha1StateCopy(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha1StateCopy(
                 self.state.get_inner(),
                 new_state.key.get_inner(), // Use new ref counted key.
                 new_state.state.as_mut().get_inner_mut(),
@@ -520,7 +520,7 @@ impl Drop for HmacSha1State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 self.state.as_mut().get_inner_mut() as *mut c_void,
                 mem::size_of_val(&mut self.state.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -541,13 +541,13 @@ pub fn hmac_sha1(key: &[u8], data: &[u8]) -> Result<[u8; SHA1_HMAC_RESULT_SIZE],
     unsafe {
         // SAFETY: FFI calls
         let mut expanded_key = HmacSha1ExpandedKey::new(key)?;
-        match symcrypt_sys::SymCryptHmacSha1ExpandKey(
+        match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha1ExpandKey(
             &mut expanded_key.as_mut().get_unchecked_mut().inner,
             key.as_ptr(),
             key.len() as symcrypt_sys::SIZE_T,
         ) {
             symcrypt_sys::SYMCRYPT_ERROR_SYMCRYPT_NO_ERROR => {
-                symcrypt_sys::SymCryptHmacSha1(
+                symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha1(
                     &mut expanded_key.as_mut().get_unchecked_mut().inner,
                     data.as_ptr(),
                     data.len() as symcrypt_sys::SIZE_T,
@@ -581,7 +581,7 @@ impl HmacSha256ExpandedKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptHmacSha256ExpandKey(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha256ExpandKey(
                 &mut expanded_key.as_mut().get_unchecked_mut().inner,
                 key.as_ptr(),
                 key.len() as symcrypt_sys::SIZE_T,
@@ -603,7 +603,7 @@ impl Drop for HmacSha256ExpandedKey {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 ptr::addr_of_mut!(self.inner) as *mut c_void,
                 mem::size_of_val(&mut self.inner) as symcrypt_sys::SIZE_T,
             );
@@ -676,7 +676,7 @@ impl HmacSha256State {
 
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha256Init(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha256Init(
                 inner_state.as_mut().get_inner_mut(),
                 expanded_key.get_inner(),
             );
@@ -695,7 +695,7 @@ impl HmacState for HmacSha256State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha256Append(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha256Append(
                 self.state.as_mut().get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -707,7 +707,7 @@ impl HmacState for HmacSha256State {
         let mut result = [0u8; SHA256_HMAC_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha256Result(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha256Result(
                 self.state.as_mut().get_inner_mut(),
                 result.as_mut_ptr(),
             );
@@ -727,7 +727,7 @@ impl Clone for HmacSha256State {
         };
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha256StateCopy(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha256StateCopy(
                 self.state.get_inner(),
                 new_state.key.get_inner(), // use new ref counted key
                 new_state.state.as_mut().get_inner_mut(),
@@ -741,7 +741,7 @@ impl Drop for HmacSha256State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 self.state.as_mut().get_inner_mut() as *mut c_void,
                 mem::size_of_val(&mut self.state.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -764,13 +764,13 @@ pub fn hmac_sha256(
     unsafe {
         // SAFETY: FFI calls
         let mut expanded_key = HmacSha256ExpandedKey::new(key)?;
-        match symcrypt_sys::SymCryptHmacSha256ExpandKey(
+        match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha256ExpandKey(
             &mut expanded_key.as_mut().get_unchecked_mut().inner,
             key.as_ptr(),
             key.len() as symcrypt_sys::SIZE_T,
         ) {
             symcrypt_sys::SYMCRYPT_ERROR_SYMCRYPT_NO_ERROR => {
-                symcrypt_sys::SymCryptHmacSha256(
+                symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha256(
                     &mut expanded_key.as_mut().get_unchecked_mut().inner,
                     data.as_ptr(),
                     data.len() as symcrypt_sys::SIZE_T,
@@ -804,7 +804,7 @@ impl HmacSha384ExpandedKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptHmacSha384ExpandKey(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha384ExpandKey(
                 &mut expanded_key.as_mut().get_unchecked_mut().inner,
                 key.as_ptr(),
                 key.len() as symcrypt_sys::SIZE_T,
@@ -826,7 +826,7 @@ impl Drop for HmacSha384ExpandedKey {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 ptr::addr_of_mut!(self.inner) as *mut c_void,
                 mem::size_of_val(&mut self.inner) as symcrypt_sys::SIZE_T,
             );
@@ -900,7 +900,7 @@ impl HmacSha384State {
 
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha384Init(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha384Init(
                 inner_state.as_mut().get_inner_mut(),
                 expanded_key.get_inner(),
             );
@@ -919,7 +919,7 @@ impl HmacState for HmacSha384State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha384Append(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha384Append(
                 self.state.as_mut().get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -931,7 +931,7 @@ impl HmacState for HmacSha384State {
         let mut result = [0u8; SHA384_HMAC_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha384Result(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha384Result(
                 self.state.as_mut().get_inner_mut(),
                 result.as_mut_ptr(),
             );
@@ -951,7 +951,7 @@ impl Clone for HmacSha384State {
         };
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha384StateCopy(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha384StateCopy(
                 self.state.get_inner(),
                 new_state.key.get_inner(), // Use new ref counted key.
                 new_state.state.as_mut().get_inner_mut(),
@@ -965,7 +965,7 @@ impl Drop for HmacSha384State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 self.state.as_mut().get_inner_mut() as *mut c_void,
                 mem::size_of_val(&mut self.state.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -988,13 +988,13 @@ pub fn hmac_sha384(
     unsafe {
         // SAFETY: FFI calls
         let mut expanded_key = HmacSha384ExpandedKey::new(key)?;
-        match symcrypt_sys::SymCryptHmacSha384ExpandKey(
+        match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha384ExpandKey(
             &mut expanded_key.as_mut().get_unchecked_mut().inner,
             key.as_ptr(),
             key.len() as symcrypt_sys::SIZE_T,
         ) {
             symcrypt_sys::SYMCRYPT_ERROR_SYMCRYPT_NO_ERROR => {
-                symcrypt_sys::SymCryptHmacSha384(
+                symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha384(
                     &mut expanded_key.as_mut().get_unchecked_mut().inner,
                     data.as_ptr(),
                     data.len() as symcrypt_sys::SIZE_T,
@@ -1028,7 +1028,7 @@ impl HmacSha512ExpandedKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptHmacSha512ExpandKey(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha512ExpandKey(
                 &mut expanded_key.as_mut().get_unchecked_mut().inner,
                 key.as_ptr(),
                 key.len() as symcrypt_sys::SIZE_T,
@@ -1050,7 +1050,7 @@ impl Drop for HmacSha512ExpandedKey {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 ptr::addr_of_mut!(self.inner) as *mut c_void,
                 mem::size_of_val(&mut self.inner) as symcrypt_sys::SIZE_T,
             );
@@ -1116,7 +1116,7 @@ impl HmacSha512State {
 
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha512Init(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha512Init(
                 inner_state.as_mut().get_inner_mut(),
                 expanded_key.get_inner(),
             );
@@ -1135,7 +1135,7 @@ impl HmacState for HmacSha512State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha512Append(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha512Append(
                 self.state.as_mut().get_inner_mut(),
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -1147,7 +1147,7 @@ impl HmacState for HmacSha512State {
         let mut result = [0u8; SHA512_HMAC_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha512Result(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha512Result(
                 self.state.as_mut().get_inner_mut(),
                 result.as_mut_ptr(),
             );
@@ -1167,7 +1167,7 @@ impl Clone for HmacSha512State {
         };
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptHmacSha512StateCopy(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha512StateCopy(
                 self.state.get_inner(),
                 new_state.key.get_inner(), // Use new ref counted key.
                 new_state.state.as_mut().get_inner_mut(),
@@ -1181,7 +1181,7 @@ impl Drop for HmacSha512State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 self.state.as_mut().get_inner_mut() as *mut c_void,
                 mem::size_of_val(&mut self.state.get_inner()) as symcrypt_sys::SIZE_T,
             );
@@ -1204,13 +1204,13 @@ pub fn hmac_sha512(
     unsafe {
         // SAFETY: FFI calls
         let mut expanded_key = HmacSha512ExpandedKey::new(key)?;
-        match symcrypt_sys::SymCryptHmacSha512ExpandKey(
+        match symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha512ExpandKey(
             &mut expanded_key.as_mut().get_unchecked_mut().inner,
             key.as_ptr(),
             key.len() as symcrypt_sys::SIZE_T,
         ) {
             symcrypt_sys::SYMCRYPT_ERROR_SYMCRYPT_NO_ERROR => {
-                symcrypt_sys::SymCryptHmacSha512(
+                symcrypt_sys::symcrypt_lib().unwrap().SymCryptHmacSha512(
                     &mut expanded_key.as_mut().get_unchecked_mut().inner,
                     data.as_ptr(),
                     data.len() as symcrypt_sys::SIZE_T,

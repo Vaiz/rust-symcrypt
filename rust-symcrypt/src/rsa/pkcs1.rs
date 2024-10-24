@@ -50,6 +50,7 @@ use crate::errors::SymCryptError;
 use crate::hash::HashAlgorithm;
 use crate::rsa::RsaKey;
 use crate::NumberFormat;
+use symcrypt_sys::symcrypt_lib;
 
 /// Impl for Pkcs1 RSA via [`RsaKey`]
 impl RsaKey {
@@ -72,7 +73,7 @@ impl RsaKey {
         let converted_hash_oids = hash_algorithm.to_oid_list();
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsaPkcs1Sign(
+            match symcrypt_lib().unwrap().SymCryptRsaPkcs1Sign(
                 self.inner(),
                 hashed_message.as_ptr(),
                 hashed_message.len() as symcrypt_sys::SIZE_T,
@@ -102,7 +103,7 @@ impl RsaKey {
         let mut decrypted_buffer = vec![0u8; modulus_size as usize]; // Max size will be the size of the modulus.
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsaPkcs1Decrypt(
+            match symcrypt_lib().unwrap().SymCryptRsaPkcs1Decrypt(
                 self.inner(),
                 encrypted_message.as_ptr(),
                 encrypted_message.len() as symcrypt_sys::SIZE_T,
@@ -142,7 +143,7 @@ impl RsaKey {
         let converted_hash_oids = hash_algorithm.to_oid_list();
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsaPkcs1Verify(
+            match symcrypt_lib().unwrap().SymCryptRsaPkcs1Verify(
                 self.inner(),
                 hashed_message.as_ptr(),
                 hashed_message.len() as symcrypt_sys::SIZE_T,
@@ -172,7 +173,7 @@ impl RsaKey {
         let mut encrypted_buffer = vec![0u8; size_of_modulus as usize];
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsaPkcs1Encrypt(
+            match symcrypt_lib().unwrap().SymCryptRsaPkcs1Encrypt(
                 self.inner(),
                 message.as_ptr(),
                 message.len() as symcrypt_sys::SIZE_T,

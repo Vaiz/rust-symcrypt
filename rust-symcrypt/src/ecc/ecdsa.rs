@@ -54,7 +54,7 @@ impl EcKey {
         let mut signature = vec![0u8; signature_size as usize]; // must be 2x size of private key SymCryptEckeySizeofPrivateKey
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptEcDsaSign(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptEcDsaSign(
                 self.inner_key(),
                 hash_value.as_ptr(),
                 hash_value.len() as symcrypt_sys::SIZE_T,
@@ -91,7 +91,7 @@ impl EcKey {
         }
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptEcDsaVerify(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptEcDsaVerify(
                 self.inner_key(),
                 hashed_message.as_ptr(),
                 hashed_message.len() as symcrypt_sys::SIZE_T,

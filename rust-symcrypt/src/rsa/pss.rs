@@ -27,6 +27,7 @@ use crate::errors::SymCryptError;
 use crate::hash::HashAlgorithm;
 use crate::rsa::RsaKey;
 use crate::NumberFormat;
+use symcrypt_sys::symcrypt_lib;
 
 impl RsaKey {
     /// `pss_sign()` returns a `Vec<u8>` that represents the signature of the hashed message, or a [`SymCryptError`] if the operation failed.
@@ -51,7 +52,7 @@ impl RsaKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsaPssSign(
+            match symcrypt_lib().unwrap().SymCryptRsaPssSign(
                 self.inner(),
                 hashed_message.as_ptr(),
                 hashed_message.len() as symcrypt_sys::SIZE_T,
@@ -94,7 +95,7 @@ impl RsaKey {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptRsaPssVerify(
+            match symcrypt_lib().unwrap().SymCryptRsaPssVerify(
                 self.inner(),
                 hashed_message.as_ptr(),
                 hashed_message.len() as symcrypt_sys::SIZE_T,

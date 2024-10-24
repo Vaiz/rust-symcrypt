@@ -123,7 +123,7 @@ impl Drop for GcmInnerKey {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptWipe(
                 ptr::addr_of_mut!(self.inner) as *mut c_void, // Using addr_of_mut! so we don't access in the inner field
                 mem::size_of_val(&self.inner) as symcrypt_sys::SIZE_T, // Using size_of_val! so we don't access in the inner field
             );
@@ -165,7 +165,7 @@ impl GcmExpandedKey {
     ) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptGcmEncrypt(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptGcmEncrypt(
                 self.expanded_key.get_inner(),
                 nonce.as_ptr(),
                 nonce.len() as symcrypt_sys::SIZE_T,
@@ -193,7 +193,7 @@ impl GcmExpandedKey {
     ) -> Result<(), SymCryptError> {
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptGcmDecrypt(
+            match symcrypt_sys::symcrypt_lib().unwrap().SymCryptGcmDecrypt(
                 self.expanded_key.get_inner(),
                 nonce.as_ptr(),
                 nonce.len() as symcrypt_sys::SIZE_T,
@@ -233,7 +233,7 @@ fn gcm_expand_key(
 ) -> Result<(), SymCryptError> {
     unsafe {
         // SAFETY: FFI calls
-        match symcrypt_sys::SymCryptGcmExpandKey(
+        match symcrypt_sys::symcrypt_lib().unwrap().SymCryptGcmExpandKey(
             expanded_key,
             cipher,
             key.as_ptr(),
@@ -266,7 +266,7 @@ pub fn validate_gcm_parameters(
 ) -> Result<(), SymCryptError> {
     unsafe {
         // SAFETY: FFI calls
-        match symcrypt_sys::SymCryptGcmValidateParameters(
+        match symcrypt_sys::symcrypt_lib().unwrap().SymCryptGcmValidateParameters(
             convert_cipher(cipher),
             nonce.len() as symcrypt_sys::SIZE_T,
             auth_data.len() as symcrypt_sys::UINT64,

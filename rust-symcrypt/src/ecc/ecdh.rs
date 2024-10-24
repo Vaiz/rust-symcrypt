@@ -38,6 +38,7 @@ use crate::ecc::{curve_to_num_format, EcKey};
 use crate::errors::SymCryptError;
 use std::vec;
 use symcrypt_sys;
+use symcrypt_sys::symcrypt_lib;
 
 /// Impl for EcDh struct.
 impl EcKey {
@@ -52,7 +53,7 @@ impl EcKey {
         let mut secret = vec![0u8; secret_length as usize];
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptEcDhSecretAgreement(
+            match symcrypt_lib().unwrap().SymCryptEcDhSecretAgreement(
                 self.inner_key(),
                 public_key.inner_key(),
                 num_format,
@@ -72,7 +73,7 @@ mod test {
     use super::*;
     use crate::ecc::{CurveType, EcKeyUsage};
 
-    // symcrypt_sys::SymCryptModuleInit() must be called via lib.rs in order to initialize the callbacks for
+    // symcrypt_lib().unwrap().SymCryptModuleInit() must be called via lib.rs in order to initialize the callbacks for
     // SymCryptEcurveAllocate, SymCryptEckeyAllocate, SymCryptCallbackAlloc, etc.
 
     #[test]

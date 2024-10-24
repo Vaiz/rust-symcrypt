@@ -98,7 +98,7 @@ pub fn symcrypt_init() {
     unsafe {
         // SAFETY: FFI calls, blocking from being run again.
         INIT.call_once(|| {
-            symcrypt_sys::SymCryptModuleInit(
+            symcrypt_sys::symcrypt_lib().unwrap().SymCryptModuleInit(
                 symcrypt_sys::SYMCRYPT_CODE_VERSION_API,
                 symcrypt_sys::SYMCRYPT_CODE_VERSION_MINOR,
             )
@@ -110,7 +110,7 @@ pub fn symcrypt_init() {
 pub fn symcrypt_random(buff: &mut [u8]) {
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptRandom(buff.as_mut_ptr(), buff.len() as u64);
+        symcrypt_sys::symcrypt_lib().unwrap().SymCryptRandom(buff.as_mut_ptr(), buff.len() as u64);
     }
 }
 
