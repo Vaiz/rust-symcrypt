@@ -37,6 +37,7 @@
 //!
 use crate::eckey::*;
 use crate::errors::SymCryptError;
+use crate::symcrypt_lib;
 use std::vec;
 use symcrypt_sys;
 
@@ -67,7 +68,7 @@ impl EcDh {
         let ecdh_key = EcKey::new(curve)?;
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptEckeySetRandom(
+            match symcrypt_lib().SymCryptEckeySetRandom(
                 symcrypt_sys::SYMCRYPT_FLAG_ECKEY_ECDH,
                 ecdh_key.inner(),
             ) {
@@ -99,7 +100,7 @@ impl EcDh {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptEckeySetValue(
+            match symcrypt_lib().SymCryptEckeySetValue(
                 std::ptr::null(), // private key set to null since none is generated
                 0,
                 public_key.as_ptr(), // only a public key is attached
@@ -129,10 +130,10 @@ impl EcDh {
         unsafe {
             // SAFETY: FFI calls
             let pub_key_len =
-                symcrypt_sys::SymCryptEckeySizeofPublicKey(self.key.inner(), ec_point_format);
+                symcrypt_lib().SymCryptEckeySizeofPublicKey(self.key.inner(), ec_point_format);
 
             let mut pub_key_bytes = vec![0u8; pub_key_len as usize];
-            match symcrypt_sys::SymCryptEckeyGetValue(
+            match symcrypt_lib().SymCryptEckeyGetValue(
                 self.key.inner(),
                 std::ptr::null_mut(), // setting private key to null since we will only access public key
                 0 as symcrypt_sys::SIZE_T,
@@ -159,7 +160,7 @@ impl EcDh {
 
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptEcDhSecretAgreement(
+            match symcrypt_lib().SymCryptEcDhSecretAgreement(
                 private.key.inner(),
                 public.key.inner(),
                 num_format,
@@ -178,7 +179,7 @@ impl EcDh {
 mod test {
     use super::*;
 
-    // symcrypt_sys::SymCryptModuleInit() must be called via lib.rs in order to initialize the callbacks for
+    // symcrypt_lib().SymCryptModuleInit() must be called via lib.rs in order to initialize the callbacks for
     // SymCryptEcurveAllocate, SymCryptEckeyAllocate, SymCryptCallbackAlloc, etc.
 
     #[test]

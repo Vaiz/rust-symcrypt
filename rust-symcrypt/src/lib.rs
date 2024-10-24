@@ -71,6 +71,8 @@ pub mod gcm;
 pub mod hash;
 pub mod hmac;
 
+static SYMCRYPT_LIB: std::sync::OnceLock<symcrypt_sys::SymCryptLib> = std::sync::OnceLock::new();
+
 /// `symcrypt_init()` must be called before any other function in the library. `symcrypt_init()` can be called multiple times,
 ///  all subsequent calls will be no-ops
 pub fn symcrypt_init() {
@@ -79,19 +81,25 @@ pub fn symcrypt_init() {
     unsafe {
         // SAFETY: FFI calls, blocking from being run again.
         INIT.call_once(|| {
-            symcrypt_sys::SymCryptModuleInit(
+            let lib = symcrypt_sys::SymCryptLib::new("symcrypt.dll").expect("failed to load symcrypt.dll");
+            lib.SymCryptModuleInit(
                 symcrypt_sys::SYMCRYPT_CODE_VERSION_API,
                 symcrypt_sys::SYMCRYPT_CODE_VERSION_MINOR,
-            )
+            );            
+            let _ = SYMCRYPT_LIB.set(lib);
         });
     }
+}
+
+fn symcrypt_lib() -> &'static symcrypt_sys::SymCryptLib {
+    SYMCRYPT_LIB.get().expect("SymCrypt lib is not loaded")
 }
 
 /// Takes in a a buffer called `buff` and fills it with random bytes. This function cannot fail.
 pub fn symcrypt_random(buff: &mut [u8]) {
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptRandom(buff.as_mut_ptr(), buff.len() as u64);
+        symcrypt_lib().SymCryptRandom(buff.as_mut_ptr(), buff.len() as u64);
     }
 }
 

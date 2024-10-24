@@ -55,6 +55,8 @@ use std::pin::Pin;
 use std::ptr;
 use symcrypt_sys;
 
+use crate::symcrypt_lib;
+
 /// 32
 pub const SHA256_RESULT_SIZE: usize = symcrypt_sys::SYMCRYPT_SHA256_RESULT_SIZE as usize;
 /// 48
@@ -89,7 +91,7 @@ impl Sha256State {
         let mut instance = Sha256State(Box::pin(symcrypt_sys::SYMCRYPT_SHA256_STATE::default()));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha256Init(&mut *instance.0);
+            symcrypt_lib().SymCryptSha256Init(&mut *instance.0);
         }
         instance
     }
@@ -101,7 +103,7 @@ impl HashState for Sha256State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha256Append(
+            symcrypt_lib().SymCryptSha256Append(
                 &mut *self.0,
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -113,7 +115,7 @@ impl HashState for Sha256State {
         let mut result = [0u8; SHA256_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha256Result(&mut *self.0, result.as_mut_ptr());
+            symcrypt_lib().SymCryptSha256Result(&mut *self.0, result.as_mut_ptr());
         }
         result
     }
@@ -124,7 +126,7 @@ impl Clone for Sha256State {
         let mut new_state = Sha256State(Box::pin(symcrypt_sys::SYMCRYPT_SHA256_STATE::default()));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha256StateCopy(&*self.0, &mut *new_state.0);
+            symcrypt_lib().SymCryptSha256StateCopy(&*self.0, &mut *new_state.0);
         }
         new_state
     }
@@ -134,7 +136,7 @@ impl Drop for Sha256State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().SymCryptWipe(
                 ptr::addr_of_mut!(self.0) as *mut c_void,
                 mem::size_of_val(&mut self.0) as symcrypt_sys::SIZE_T,
             )
@@ -151,7 +153,7 @@ pub fn sha256(data: &[u8]) -> [u8; SHA256_RESULT_SIZE] {
     let mut result = [0; SHA256_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha256(
+        symcrypt_lib().SymCryptSha256(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),
@@ -173,7 +175,7 @@ impl Sha384State {
         let mut instance = Sha384State(Box::pin(symcrypt_sys::SYMCRYPT_SHA384_STATE::default()));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha384Init(&mut *instance.0);
+            symcrypt_lib().SymCryptSha384Init(&mut *instance.0);
         }
         instance
     }
@@ -185,7 +187,7 @@ impl HashState for Sha384State {
     fn append(&mut self, data: &[u8]) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha384Append(
+            symcrypt_lib().SymCryptSha384Append(
                 &mut *self.0,
                 data.as_ptr(),
                 data.len() as symcrypt_sys::SIZE_T,
@@ -197,7 +199,7 @@ impl HashState for Sha384State {
         let mut result = [0u8; SHA384_RESULT_SIZE];
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha384Result(&mut *self.0, result.as_mut_ptr());
+            symcrypt_lib().SymCryptSha384Result(&mut *self.0, result.as_mut_ptr());
         }
         result
     }
@@ -208,7 +210,7 @@ impl Clone for Sha384State {
         let mut new_state = Sha384State(Box::pin(symcrypt_sys::SYMCRYPT_SHA384_STATE::default()));
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptSha384StateCopy(&*self.0, &mut *new_state.0);
+            symcrypt_lib().SymCryptSha384StateCopy(&*self.0, &mut *new_state.0);
         }
         new_state
     }
@@ -218,7 +220,7 @@ impl Drop for Sha384State {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptWipe(
+            symcrypt_lib().SymCryptWipe(
                 ptr::addr_of_mut!(self.0) as *mut c_void,
                 mem::size_of_val(&mut self.0) as symcrypt_sys::SIZE_T,
             )
@@ -235,7 +237,7 @@ pub fn sha384(data: &[u8]) -> [u8; SHA384_RESULT_SIZE] {
     let mut result = [0; SHA384_RESULT_SIZE];
     unsafe {
         // SAFETY: FFI calls
-        symcrypt_sys::SymCryptSha384(
+        symcrypt_lib().SymCryptSha384(
             data.as_ptr(),
             data.len() as symcrypt_sys::SIZE_T,
             result.as_mut_ptr(),

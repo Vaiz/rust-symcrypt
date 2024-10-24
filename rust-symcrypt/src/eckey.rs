@@ -2,7 +2,7 @@
 //!
 //! The [`CurveType`] enum provides an enumeration of supported curves that can be used in
 //! elliptical curve operations. Currently the only supported curves are `NistP256`, `NistP384` and `Curve25519`
-use crate::{errors::SymCryptError, symcrypt_init};
+use crate::{errors::SymCryptError, symcrypt_init, symcrypt_lib};
 use lazy_static::lazy_static;
 use symcrypt_sys;
 
@@ -34,7 +34,7 @@ impl EcKey {
         unsafe {
             // SAFETY: FFI calls
             // Stack allocated since we will do SymCryptEckeyAllocate.
-            let key_ptr = symcrypt_sys::SymCryptEckeyAllocate(ec_curve.0);
+            let key_ptr = symcrypt_lib().SymCryptEckeyAllocate(ec_curve.0);
             if key_ptr.is_null() {
                 return Err(SymCryptError::MemoryAllocationFailure);
             }
@@ -81,7 +81,7 @@ impl Drop for EcKey {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptEckeyFree(self.inner);
+            symcrypt_lib().SymCryptEckeyFree(self.inner);
         }
     }
 }
@@ -103,7 +103,7 @@ fn internal_new(curve: CurveType) -> Result<EcCurve, SymCryptError> {
         symcrypt_init();
 
         // Stack allocated since SymCryptEcCurveAllocate is called.
-        let curve_ptr = symcrypt_sys::SymCryptEcurveAllocate(convert_curve(curve), 0);
+        let curve_ptr = symcrypt_lib().SymCryptEcurveAllocate(convert_curve(curve), 0);
         if curve_ptr.is_null() {
             return Err(SymCryptError::MemoryAllocationFailure);
         }
@@ -128,7 +128,7 @@ impl EcCurve {
     pub(crate) fn get_size(&self) -> u32 {
         unsafe {
             // SAFETY: FFI calls
-            let curve_size = symcrypt_sys::SymCryptEcurveSizeofFieldElement(self.0);
+            let curve_size = symcrypt_lib().SymCryptEcurveSizeofFieldElement(self.0);
             curve_size
         }
     }
@@ -139,7 +139,7 @@ impl Drop for EcCurve {
     fn drop(&mut self) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptEcurveFree(self.0)
+            symcrypt_lib().SymCryptEcurveFree(self.0)
         }
     }
 }

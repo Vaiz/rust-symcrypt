@@ -7,11 +7,3 @@ extern crate libc;
 
 mod symcrypt_bindings;
 pub use symcrypt_bindings::*;
-
-static SYMCRYPT_LIB: std::sync::LazyLock<SymCryptLib> = std::sync::LazyLock::new(|| {
-    unsafe{ SymCryptLib::new("symcrypt.dll") }.expect("failed to load symcrypt.dll")
-});
-
-pub fn symcrypt_lib() -> &'static SymCryptLib {
-    &SYMCRYPT_LIB
-}

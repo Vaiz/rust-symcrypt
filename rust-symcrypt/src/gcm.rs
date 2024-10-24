@@ -63,6 +63,7 @@
 //!
 use crate::block_ciphers::*;
 use crate::errors::SymCryptError;
+use crate::symcrypt_lib;
 use std::pin::Pin;
 use symcrypt_sys;
 
@@ -107,7 +108,7 @@ impl GcmExpandedKey {
     ) {
         unsafe {
             // SAFETY: FFI calls
-            symcrypt_sys::SymCryptGcmEncrypt(
+            symcrypt_lib().SymCryptGcmEncrypt(
                 &*self.expanded_key,
                 nonce.as_ptr(),
                 nonce.len() as symcrypt_sys::SIZE_T,
@@ -135,7 +136,7 @@ impl GcmExpandedKey {
     ) -> Result<(), SymCryptError> {
         unsafe {
             // SAFETY: FFI calls
-            match symcrypt_sys::SymCryptGcmDecrypt(
+            match symcrypt_lib().SymCryptGcmDecrypt(
                 &*self.expanded_key,
                 nonce.as_ptr(),
                 nonce.len() as symcrypt_sys::SIZE_T,
@@ -175,7 +176,7 @@ fn gcm_expand_key(
 ) -> Result<(), SymCryptError> {
     unsafe {
         // SAFETY: FFI calls
-        match symcrypt_sys::SymCryptGcmExpandKey(
+        match symcrypt_lib().SymCryptGcmExpandKey(
             expanded_key,
             cipher,
             key.as_ptr(),
@@ -208,7 +209,7 @@ pub fn validate_gcm_parameters(
 ) -> Result<(), SymCryptError> {
     unsafe {
         // SAFETY: FFI calls
-        match symcrypt_sys::SymCryptGcmValidateParameters(
+        match symcrypt_lib().SymCryptGcmValidateParameters(
             convert_cipher(cipher),
             nonce.len() as symcrypt_sys::SIZE_T,
             auth_data.len() as symcrypt_sys::UINT64,
