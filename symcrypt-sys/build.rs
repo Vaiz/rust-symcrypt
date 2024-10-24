@@ -7,10 +7,10 @@ fn main() {
         // the long term placement of a Windows shipped symcrypt.dll 
         // println!("cargo:rustc-link-search=native=C:/Windows/System32/"); 
 
-        let lib_path = env::var("SYMCRYPT_LIB_PATH").unwrap_or_else(|_| panic!("SYMCRYPT_LIB_PATH environment variable not set"));
-        println!("cargo:rustc-link-search=native={}", lib_path);
+        //let lib_path = env::var("SYMCRYPT_LIB_PATH").unwrap_or_else(|_| panic!("SYMCRYPT_LIB_PATH environment variable not set"));
+        //println!("cargo:rustc-link-search=native={}", lib_path);
 
-        println!("cargo:rustc-link-lib=dylib=symcrypt");
+        //println!("cargo:rustc-link-lib=dylib=symcrypt");
 
         // During run time, the OS will handle finding the symcrypt.dll file. The places Windows will look will be:
         // 1. The folder from which the application loaded.
