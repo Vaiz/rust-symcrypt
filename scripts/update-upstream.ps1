@@ -15,3 +15,6 @@ git clone --branch $tag --depth 1 $repoUrl $destinationDir
 python "$destinationDir/scripts/version.py" --build-info
 
 # TODO: cleanup unnecessary files
+$objects_to_keep = @("inc", "lib", "LICENSE", "NOTICE", "README.md", "SECURITY.md", "version.json")
+Get-ChildItem $destinationDir | Where-Object { $_.Name -notin $objects_to_keep } | Remove-Item -Recurse -Force
+Remove-Item -Recurse -Force "$destinationDir/.git"
