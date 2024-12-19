@@ -1,7 +1,22 @@
+$ErrorActionPreference = "Stop"
+$PSNativeCommandUseErrorActionPreference = $True
+
 $header = "$PSScriptRoot/../symcrypt-bindgen/upstream/inc/wrapper.h"
 $outDir = "$PSScriptRoot/../symcrypt-sys/bindings"
 
-# $targets = @("linux_amd64", "linux_arm64", "windows_amd64", "windows_arm64")
+if ($env:OS -eq "Windows_NT") {
+    $targets = @(
+        "x86_64-pc-windows-msvc",
+        "aarch64-pc-windows-msvc"
+        #"x86_64-unknown-linux-gnu",
+        #"aarch64-unknown-linux-gnu"
+    )
+} else {
+    $targets = @(
+        "x86_64-unknown-linux-gnu",
+        "aarch64-unknown-linux-gnu"
+    )
+}
 
 $wrapperHeader = '
 #ifdef __linux__
@@ -11,50 +26,60 @@ $wrapperHeader = '
 #include "symcrypt.h"
 '
 
-$wrapperHeader | Out-File -Encoding utf8 -FilePath $header
+$wrapperHeader | Out-File -Encoding utf8 -Force -FilePath $header
 
-$target = "windows_amd64"
-mkdir "$outDir/$target" -ErrorAction Stop
+foreach ($target in $targets) {
+    if (Test-Path "$outDir/$target") {
+        Remove-Item "$outDir/$target" -Recurse -Force
+    }
+    mkdir "$outDir/$target"
 
-bindgen `
-    $header `
-    --generate-block `
-    --no-layout-tests `
-    --no-prepend-enum-name `
-    --with-derive-eq --with-derive-default --with-derive-hash --with-derive-ord `
-    --use-array-pointers-in-arguments `
-    --generate types `
-    -o "$outDir/$target/types.rs"
+    $bindgenParams = @(
+        "--generate-block",
+        "--no-layout-tests",
+        "--no-prepend-enum-name",
+        "--with-derive-eq",
+        "--with-derive-default",
+        "--with-derive-hash",
+        "--with-derive-ord",
+        "--use-array-pointers-in-arguments"
+        #"--formatter=none"
+    )
+    $clangParams = @(
+        "-v",
+        "-target", $target
+    )
 
-bindgen `
-    $header `
-    --generate-block `
-    --no-layout-tests `
-    --no-prepend-enum-name `
-    --with-derive-eq --with-derive-default --with-derive-hash --with-derive-ord `
-    --use-array-pointers-in-arguments `
-    --generate vars `
-    -o "$outDir/$target/consts.rs"
+    bindgen `
+        $header `
+        @bindgenParams `
+        --generate types `
+        -o "$outDir/$target/types.rs" `
+        -- @clangParams
 
-bindgen `
-    $header `
-    --generate-block `
-    --no-layout-tests `
-    --no-prepend-enum-name `
-    --with-derive-eq --with-derive-default --with-derive-hash --with-derive-ord `
-    --use-array-pointers-in-arguments `
-    --raw-line "use super::types::*;" `
-    --generate functions `
-    -o "$outDir/$target/fns_source.rs"
+    bindgen `
+        $header `
+        @bindgenParams `
+        --generate vars `
+        -o "$outDir/$target/consts.rs" `
+        -- @clangParams
 
-bindgen `
-    $header `
-    --generate-block `
-    --no-layout-tests `
-    --no-prepend-enum-name `
-    --with-derive-eq --with-derive-default --with-derive-hash --with-derive-ord `
-    --use-array-pointers-in-arguments `
-    --raw-line "use super::types::*;" `
-    --dynamic-loading APILoader `
-    --generate functions `
-    -o "$outDir/$target/fns_libloading.rs"
+    bindgen `
+        $header `
+        @bindgenParams `
+        --raw-line "use super::types::*;" `
+        --generate functions `
+        -o "$outDir/$target/fns_source.rs" `
+        -- @clangParams
+
+    bindgen `
+        $header `
+        @bindgenParams `
+        --raw-line "use super::types::*;" `
+        --dynamic-loading APILoader `
+        --generate functions `
+        -o "$outDir/$target/fns_libloading.rs" `
+        -- @clangParams
+}
+
+Remove-Item $header -Force
