@@ -121,6 +121,7 @@ foreach ($target in $targets) {
     bindgen `
         $header `
         @bindgenParams `
+        --raw-line "use super::types::*;" `
         --generate vars `
         @generateVarsParams `
         -o "$targetFolder/consts.rs" `
