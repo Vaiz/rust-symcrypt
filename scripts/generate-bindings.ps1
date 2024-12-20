@@ -98,7 +98,7 @@ foreach ($target in $targets) {
     $bindgenParams = @(
         "--generate-block",
         "--no-layout-tests",
-        "--no-prepend-enum-name",
+        #"--no-prepend-enum-name",
         "--with-derive-eq",
         "--with-derive-default",
         "--with-derive-hash",
