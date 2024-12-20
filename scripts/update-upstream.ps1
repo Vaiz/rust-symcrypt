@@ -4,7 +4,7 @@ param(
 )
 
 $repoUrl = "https://github.com/microsoft/SymCrypt.git"
-$destinationDir = "$PSScriptRoot/../symcrypt-bindgen/upstream"
+$destinationDir = "$PSScriptRoot/../symcrypt-sys/upstream"
 
 if (Test-Path $destinationDir) {
     Remove-Item $destinationDir -Recurse -Force

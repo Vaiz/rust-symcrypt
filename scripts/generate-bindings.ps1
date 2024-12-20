@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $True
 
-$header = "$PSScriptRoot/../symcrypt-bindgen/upstream/inc/wrapper.h"
+$header = "$PSScriptRoot/../symcrypt-sys/upstream/inc/wrapper.h"
 $outDir = "$PSScriptRoot/../symcrypt-sys/bindings"
 
 if ($env:OS -eq "Windows_NT") {
