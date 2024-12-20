@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $True
 
 $header = "$PSScriptRoot/../symcrypt-sys/upstream/inc/wrapper.h"
-$outDir = "$PSScriptRoot/../symcrypt-sys/bindings"
+$outDir = "$PSScriptRoot/../symcrypt-sys/src/bindings"
 
 if ($env:OS -eq "Windows_NT") {
     $targets = @(
@@ -89,10 +89,11 @@ foreach ($function in $functionBlockList) {
 }
 
 foreach ($target in $targets) {
-    if (Test-Path "$outDir/$target") {
-        Remove-Item "$outDir/$target" -Recurse -Force
+    $targetFolder = "$outDir/$($target.Replace("-", "_"))"
+    if (Test-Path $targetFolder) {
+        Remove-Item $targetFolder -Recurse -Force
     }
-    mkdir "$outDir/$target"
+    mkdir $targetFolder
 
     $bindgenParams = @(
         "--generate-block",
@@ -114,7 +115,7 @@ foreach ($target in $targets) {
         $header `
         @bindgenParams `
         --generate types `
-        -o "$outDir/$target/types.rs" `
+        -o "$targetFolder/types.rs" `
         -- @clangParams
 
     bindgen `
@@ -122,7 +123,7 @@ foreach ($target in $targets) {
         @bindgenParams `
         --generate vars `
         @generateVarsParams `
-        -o "$outDir/$target/consts.rs" `
+        -o "$targetFolder/consts.rs" `
         -- @clangParams
 
     bindgen `
@@ -131,7 +132,7 @@ foreach ($target in $targets) {
         --raw-line "use super::types::*;" `
         --generate functions `
         @generateFunctionsParams `
-        -o "$outDir/$target/fns_source.rs" `
+        -o "$targetFolder/fns_source.rs" `
         -- @clangParams
 
     bindgen `
@@ -141,7 +142,7 @@ foreach ($target in $targets) {
         --dynamic-loading APILoader `
         --generate functions `
         @generateFunctionsParams `
-        -o "$outDir/$target/fns_libloading.rs" `
+        -o "$targetFolder/fns_libloading.rs" `
         -- @clangParams
 }
 
