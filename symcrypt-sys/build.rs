@@ -136,7 +136,7 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
         "hmacsha3_384.c",
         "hmacsha3_512.c",
         "kmac.c",
-        "libmain.c",
+        //"libmain.c",
         "lms.c",
         "marvin32.c",
         "md2.c",
@@ -210,7 +210,7 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
         "fdef369_asm.asm",
         "sha256xmm_asm.asm",
         "sha256ymm_asm.asm",
-        "sha2common_asm.asm",
+        //"sha2common_asm.asm", - not a part of the build
         "sha512ymm_asm.asm",
         "sha512ymm_avx512vl_asm.asm",
         "wipe.asm",
@@ -224,8 +224,12 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
     cc.files(MODULE_FILES);
 
     #[cfg(all(windows, target_arch = "x86_64"))]
-    cc.asm_flag("-Wa,-defsym,abc=1")
-    .files(ASM_FILES);
+    {
+        const ASM_DIR: &str = "upstream/lib/amd64/";
+        for file in ASM_FILES {
+            cc.file(format!("{ASM_DIR}/{file}"));
+        }
+    }
 
     #[cfg(windows)]
     cc.file(format!("{SOURCE_DIR}/IEEE802_11SaeCustom.c"));
