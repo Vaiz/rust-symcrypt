@@ -23,7 +23,7 @@ if ($ArchDefine -notin @("amd64", "x86", "arm64", "arm")) {
 # Get directory and file name components
 $RootPath = [System.IO.Path]::GetDirectoryName($FilePath)
 $FileStem = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
-$CppAsmArch = "SYMCRYPT_ASM_" + $ArchDefine.ToUpper()
+$CppAsmArch = "SYMCRYPT_CPU_" + $ArchDefine.ToUpper()
 $OutputAsm = Join-Path $RootPath "$FileStem.asm"
 Write-Output "OutputAsm: $OutputAsm"
 
