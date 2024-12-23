@@ -34,5 +34,13 @@ Write-Output "OutputCppAsm: $OutputCppAsm"
 
 # Run the Python script
 $PythonScript = "$PSScriptRoot/../symcrypt-sys/upstream/scripts/symcryptasm_processor.py"
-& python $PythonScript $OutFormat $ArchDefine $CallingConvention $FilePath $OutputCppAsm
+$symcryptasm_args = @(
+    $OutFormat,
+    $ArchDefine,
+    $CallingConvention,
+    $FilePath,
+    $OutputCppAsm
+)
+Write-Output "Running: python $PythonScript $symcryptasm_args"
+& python $PythonScript @symcryptasm_args
 & "$PSScriptRoot/process-cppasm.ps1" $OutputCppAsm $OutFormat $ArchDefine
