@@ -27,6 +27,12 @@ $wrapperHeader = '
 '
 $wrapperHeader | Out-File -Encoding utf8 -Force -FilePath $header
 
+$moduleCode = '
+pub mod consts;
+pub mod types;
+pub mod fns_source;
+'
+
 $varAllowList = @(
     "^(SYMCRYPT_CODE_VERSION.*)$",
     "^(SYMCRYPT_(SHA3_256|SHA3_384|SHA3_512|SHA256|SHA384|SHA512|SHA1|MD5)_RESULT_SIZE$)",
@@ -89,11 +95,14 @@ foreach ($function in $functionBlockList) {
 }
 
 foreach ($target in $targets) {
-    $targetFolder = "$outDir/$($target.Replace("-", "_"))"
+    $targetName = $target.Replace("-", "_")
+    $targetFolder = "$outDir/$targetName"
     if (Test-Path $targetFolder) {
         Remove-Item $targetFolder -Recurse -Force
     }
     mkdir $targetFolder
+
+    $moduleCode | Out-File -Encoding utf8 -Force -FilePath $outDir/$targetName.rs
 
     $bindgenParams = @(
         "--generate-block",
