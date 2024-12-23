@@ -136,7 +136,7 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
         "hmacsha3_384.c",
         "hmacsha3_512.c",
         "kmac.c",
-        //"libmain.c",
+        "libmain.c",
         "lms.c",
         "marvin32.c",
         "md2.c",
@@ -227,6 +227,7 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
     {
         const ASM_DIR: &str = "upstream/lib/amd64/";
         for file in ASM_FILES {
+            cc.asm_flag("/DSYMCRYPT_MASM");
             cc.file(format!("{ASM_DIR}/{file}"));
         }
     }
@@ -237,10 +238,6 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
     cc.file(format!("{SOURCE_DIR}/linux/intrinsics.c"));
 
     println!("Files to compile: {}", cc.get_files().count());
-
-    #[cfg(windows)]
-    cc.define("SYMCRYPT_MASM", None);
-
     cc.compile(lib_name);
 
     Ok(())
