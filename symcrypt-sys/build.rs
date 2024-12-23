@@ -197,6 +197,14 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
         "xmss.c",
         "xtsaes.c",
     ];
+    #[cfg(windows)]
+    const PLATFORM_FILES: &[&str] = &[
+        "env_windowsUserModeWin7.c",
+        "env_windowsUserModeWin8_1.c",
+    ];
+    #[cfg(not(windows))]
+    const PLATFORM_FILES: &[&str] = &[];
+
     const MODULE_FILES: &[&str] = &[
         #[cfg(windows)]
         "upstream/modules/windows/user/module.c",
@@ -219,6 +227,9 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
     let mut cc = cc::Build::new();
     cc.include("upstream/inc").warnings(false);
     for file in COMMON_FILES {
+        cc.file(format!("{SOURCE_DIR}/{file}"));
+    }
+    for file in PLATFORM_FILES {
         cc.file(format!("{SOURCE_DIR}/{file}"));
     }
     cc.files(MODULE_FILES);
