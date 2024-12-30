@@ -68,7 +68,7 @@ jobs:
 
     - name: Run tests
       shell: pwsh
-      run: 
+      run: |
         Write-Output "SYMCRYPT_LIB_PATH=$env:SYMCRYPT_LIB_PATH"
         Write-Output "PATH=$env:PATH"
         cargo test --verbose
