@@ -47,13 +47,16 @@ jobs:
       run: rustup target add ${{ matrix.target }}
 
     - name: Download SymCrypt
-      if [[ ${{ matrix.symcrypt }} == *.tar.gz ]]; then
-        curl -L ${{ matrix.symcrypt }} -o symcrypt.tar.gz
-        tar -xzf symcrypt.tar.gz -C symcrypt
-      else
-        curl -L ${{ matrix.symcrypt }} -o symcrypt.zip
-        unzip symcrypt.zip -d symcrypt
-      fi
+      run: |
+        if [[ ${{ matrix.symcrypt }} == *.tar.gz ]]; then
+          curl -L ${{ matrix.symcrypt }} -o symcrypt.tar.gz
+          mkdir -p symcrypt
+          tar -xzf symcrypt.tar.gz -C symcrypt
+        else
+          curl -L ${{ matrix.symcrypt }} -o symcrypt.zip
+          mkdir -p symcrypt
+          unzip symcrypt.zip -d symcrypt
+        fi
 
     - name: Build
       run: cargo build --verbose
