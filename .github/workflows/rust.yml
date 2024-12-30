@@ -31,7 +31,9 @@ jobs:
             use-cross: true
             
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.target }}
+    name: ${{ matrix.target }}    
+    env:
+      CARGO_BUILD_TARGET: ${{ matrix.target }}
     
     steps:
     - uses: actions/checkout@v4
