@@ -12,7 +12,6 @@ env:
 jobs:
   build:
     strategy:
-      fail-fast: false
       matrix:
         include:
           - target: x86_64-pc-windows-msvc
@@ -49,7 +48,7 @@ jobs:
     - name: Download SymCrypt
       shell: pwsh
       run: |
-        if (${{ matrix.symcrypt }} -match "\.tar\.gz$") {
+        if ("${{ matrix.symcrypt }}" -match "\.tar\.gz$") {
           Invoke-WebRequest -Uri ${{ matrix.symcrypt }} -OutFile symcrypt.tar.gz
           New-Item -ItemType Directory -Force -Path symcrypt
           tar -xzf symcrypt.tar.gz -C symcrypt
