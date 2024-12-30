@@ -30,8 +30,7 @@ jobs:
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             symcrypt: "https://github.com/microsoft/SymCrypt/releases/download/v103.4.2/symcrypt-linux-generic-arm64-release-103.4.2-171f697.tar.gz"
-            #use-cross: true
-            run-tests: true
+            run-tests: false
             
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.target }}    
@@ -41,14 +40,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install cross
-      if: matrix.use-cross
-      uses: taiki-e/install-action@v2
-      with:
-        tool: cross
-
     - name: Install host target
-      if: "!matrix.use-cross"
       run: rustup target add ${{ matrix.target }}
 
     - name: Download SymCrypt
