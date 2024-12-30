@@ -18,16 +18,20 @@ jobs:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             symcrypt: "https://github.com/microsoft/SymCrypt/releases/download/v103.4.2/symcrypt-windows-amd64-release-103.4.2-171f697.zip"
+            run-tests: true
           - target: aarch64-pc-windows-msvc
             os: windows-latest
             symcrypt: "https://github.com/microsoft/SymCrypt/releases/download/v103.4.2/symcrypt-windows-arm64-release-103.4.2-171f697.zip"
+            run-tests: false # Windows doesn't support ARM64 emulation
           - target: x86_64-unknown-linux-gnu
             symcrypt: "https://github.com/microsoft/SymCrypt/releases/download/v103.4.2/symcrypt-linux-generic-amd64-release-103.4.2-171f697.tar.gz"
             os: ubuntu-latest
+            run-tests: true
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             symcrypt: "https://github.com/microsoft/SymCrypt/releases/download/v103.4.2/symcrypt-linux-generic-arm64-release-103.4.2-171f697.tar.gz"
             #use-cross: true
+            run-tests: true
             
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.target }}    
@@ -67,6 +71,7 @@ jobs:
       run: cargo build --verbose --target ${{ matrix.target }}
 
     - name: Run tests
+      if: matrix.run-tests
       shell: pwsh
       run: |
         Write-Output "SYMCRYPT_LIB_PATH=$env:SYMCRYPT_LIB_PATH"
