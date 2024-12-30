@@ -51,6 +51,7 @@ jobs:
     - name: Download SymCrypt
       shell: pwsh
       run: |
+        $dir = $(Get-Item .).FullName
         if ("${{ matrix.symcrypt }}" -match "\.tar\.gz$") {
           Invoke-WebRequest -Uri ${{ matrix.symcrypt }} -OutFile symcrypt.tar.gz
           New-Item -ItemType Directory -Force -Path symcrypt
@@ -59,8 +60,8 @@ jobs:
           Invoke-WebRequest -Uri ${{ matrix.symcrypt }} -OutFile symcrypt.zip
           New-Item -ItemType Directory -Force -Path symcrypt
           Expand-Archive -Path symcrypt.zip -DestinationPath symcrypt
-          echo "symcrypt/dll" >> $env:GITHUB_PATH
-          echo "SYMCRYPT_LIB_PATH=symcrypt/dll" >> $env:GITHUB_ENV   
+          echo "$dir/symcrypt/dll" >> $env:GITHUB_PATH
+          echo "SYMCRYPT_LIB_PATH=$dir/symcrypt/dll" >> $env:GITHUB_ENV   
         }
 
     - name: Build
