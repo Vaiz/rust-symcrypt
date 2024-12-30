@@ -64,11 +64,11 @@ jobs:
         }
 
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --verbose --target ${{ matrix.target }}
 
     - name: Run tests
       shell: pwsh
       run: |
         Write-Output "SYMCRYPT_LIB_PATH=$env:SYMCRYPT_LIB_PATH"
         Write-Output "PATH=$env:PATH"
-        cargo test --verbose
+        cargo test --verbose --target ${{ matrix.target }}
