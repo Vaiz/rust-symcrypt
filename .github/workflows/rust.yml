@@ -59,6 +59,8 @@ jobs:
           Invoke-WebRequest -Uri ${{ matrix.symcrypt }} -OutFile symcrypt.tar.gz
           New-Item -ItemType Directory -Force -Path symcrypt
           tar -xzf symcrypt.tar.gz -C symcrypt
+          echo "$dir/symcrypt/lib" >> $env:GITHUB_PATH
+          echo "SYMCRYPT_LIB_PATH=$dir/symcrypt/lib" >> $env:GITHUB_ENV
         } else {
           Invoke-WebRequest -Uri ${{ matrix.symcrypt }} -OutFile symcrypt.zip
           New-Item -ItemType Directory -Force -Path symcrypt
