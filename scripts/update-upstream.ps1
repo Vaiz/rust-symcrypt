@@ -22,13 +22,21 @@ $tag >> "$destinationDir/VERSION"
 python "$destinationDir/scripts/version.py" --build-info
 
 # WIN32_amd64
-$symcryptasm = Get-ChildItem "$destinationDir/lib/amd64" -Filter *.symcryptasm;
-foreach ($file in $symcryptasm) {
-    & "$PSScriptRoot/process-symcryptasm.ps1" `
-        -FilePath $file.FullName `
-        -OutFormat masm `
-        -ArchDefine amd64 `
-        -CallingConvention msft
+$asmSettings = @(
+    @("$destinationDir/lib/amd64", "amd64", "masm", "msft"),
+    @("$destinationDir/lib/arm64", "arm64", "armasm64", "aapcs64")
+)
+
+foreach ($settings in $asmSettings) {
+    $dir = $settings[0]; $arch = $settings[1]; $outFormat = $settings[2]; $callingConvention = $settings[3]
+    $symcryptasm = Get-ChildItem $dir -Filter *.symcryptasm;
+    foreach ($file in $symcryptasm) {
+        & "$PSScriptRoot/process-symcryptasm.ps1" `
+            -FilePath $file.FullName `
+            -OutFormat $outFormat `
+            -ArchDefine $arch `
+            -CallingConvention $callingConvention
+    }
 }
 
 # TODO: cleanup unnecessary files

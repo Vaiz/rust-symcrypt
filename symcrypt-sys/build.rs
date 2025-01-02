@@ -3,7 +3,7 @@ fn main() -> std::io::Result<()> {
     link_symcrypt_dynamicaly()?;
 
     #[cfg(not(feature = "dynamic"))]
-    compile_and_link_symcrypt()?;
+    static_link::compile_and_link_symcrypt()?;
 
     Ok(())
 }
@@ -54,207 +54,250 @@ fn link_symcrypt_dynamicaly() -> std::io::Result<()> {
 }
 
 #[cfg(not(feature = "dynamic"))]
-fn compile_and_link_symcrypt() -> std::io::Result<()> {
-    // based on SymCrypt/lib/CMakeLists.txt
+pub mod static_link {
+    pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
+        // based on SymCrypt/lib/CMakeLists.txt
 
-    const ADDITIONAL_DEPENDENCIES: &[&str] = &[
-        #[cfg(windows)]
-        "bcrypt",
-    ];
-    println!("cargo:rerun-if-changed=upstream");
-    println!("Compiling SymCrypt...");
+        let target_triple = Triple::get_target_triple();
+        println!("Target triple: {}", target_triple.to_triple());
 
-    const LIB_NAME: &str = "symcrypt_static";
-    compile_symcrypt_static(LIB_NAME)?;
-    println!("cargo:rustc-link-lib=static={LIB_NAME}");
+        const ADDITIONAL_DEPENDENCIES: &[&str] = &[
+            #[cfg(windows)]
+            "bcrypt",
+        ];
+        println!("cargo:rerun-if-changed=upstream");
+        println!("Compiling SymCrypt...");
 
-    for dep in ADDITIONAL_DEPENDENCIES {
-        println!("cargo:rustc-link-lib=dylib={dep}");
+        const LIB_NAME: &str = "symcrypt_static";
+        compile_symcrypt_static(LIB_NAME, target_triple)?;
+        println!("cargo:rustc-link-lib=static={LIB_NAME}");
+
+        for dep in ADDITIONAL_DEPENDENCIES {
+            println!("cargo:rustc-link-lib=dylib={dep}");
+        }
+
+        Ok(())
     }
 
-    Ok(())
-}
-
-#[cfg(not(feature = "dynamic"))]
-fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
-    const SOURCE_DIR: &str = "upstream/lib";
-    const CMAKE_SOURCES_COMMON: &str = "
-    3des.c
-    a_dispatch.c
-    aes-asm.c
-    aes-c.c
-    aes-default-bc.c
-    aes-default.c
-    aes-key.c
-    aes-neon.c
-    aes-selftest.c
-    aes-xmm.c
-    aes-ymm.c
-    aescmac.c
-    aesCtrDrbg.c
-    AesTables.c
-    blockciphermodes.c
-    ccm.c
-    chacha20_poly1305.c
-    chacha20.c
-    cpuid_notry.c
-    cpuid_um.c
-    cpuid.c
-    crt.c
-    DesTables.c
-    desx.c
-    dh.c
-    dl_internal_groups.c
-    dlgroup.c
-    dlkey.c
-    dsa.c
-    ec_dh.c
-    ec_dispatch.c
-    ec_dsa.c
-    ec_internal_curves.c
-    ec_montgomery.c
-    ec_mul.c
-    ec_short_weierstrass.c
-    ec_twisted_edwards.c
-    eckey.c
-    ecpoint.c
-    ecurve.c
-    equal.c
-    FatalIntercept.c
-    fdef_general.c
-    fdef_int.c
-    fdef_mod.c
-    fdef369_mod.c
-    fips_selftest.c
-    gcm.c
-    gen_int.c
-    ghash.c
-    hash.c
-    hkdf_selftest.c
-    hkdf.c
-    hmac.c
-    hmacmd5.c
-    hmacsha1.c
-    hmacsha256.c
-    hmacsha384.c
-    hmacsha512.c
-    hmacsha3_256.c
-    hmacsha3_384.c
-    hmacsha3_512.c
-    kmac.c
-    libmain.c
-    marvin32.c
-    md2.c
-    md4.c
-    md5.c
-    modexp.c
-    paddingPkcs7.c
-    parhash.c
-    pbkdf2_hmacsha1.c
-    pbkdf2_hmacsha256.c
-    pbkdf2.c
-    poly1305.c
-    primes.c
-    rc2.c
-    rc4.c
-    rdrand.c
-    rdseed.c
-    recoding.c
-    rsa_enc.c
-    rsa_padding.c
-    rsakey.c
-    ScsTable.c
-    scsTools.c
-    selftest.c
-    session.c
-    sha1.c
-    sha256.c
-    sha256Par.c
-    sha256Par-ymm.c
-    sha256-xmm.c
-    sha256-ymm.c
-    sha512.c
-    sha512Par.c
-    sha512Par-ymm.c
-    sha512-ymm.c
-    sha3.c
-    sha3_256.c
-    sha3_384.c
-    sha3_512.c
-    shake.c
-    sp800_108_hmacsha1.c
-    sp800_108_hmacsha256.c
-    sp800_108_hmacsha512.c
-    sp800_108.c
-    srtp_kdf.c
-    srtp_kdf_selftest.c
-    ssh_kdf.c
-    ssh_kdf_sha256.c
-    ssh_kdf_sha512.c
-    tlsCbcVerify.c
-    tlsprf_selftest.c
-    tlsprf.c
-    xtsaes.c
-";
-    const COMMON_FILES: &[&str] = &[
-        "env_generic.c", // symcrypt_generic
-    ];
-    #[cfg(windows)]
-    const PLATFORM_FILES: &[&str] = &["env_windowsUserModeWin7.c", "env_windowsUserModeWin8_1.c"];
-    #[cfg(not(windows))]
-    const PLATFORM_FILES: &[&str] = &[];
-
-    const MODULE_FILES: &[&str] = &[
-        #[cfg(windows)]
-        "upstream/modules/windows/user/module.c",
-    ];
-
-    #[cfg(all(windows, target_arch = "x86_64"))]
-    const ASM_FILES: &[&str] = &[
-        "aesasm.asm",
-        "fdef_asm.asm",
-        "fdef_mulx.asm",
-        "fdef369_asm.asm",
-        "sha256xmm_asm.asm",
-        "sha256ymm_asm.asm",
-        //"sha2common_asm.asm", - not a part of the build
-        "sha512ymm_asm.asm",
-        "sha512ymm_avx512vl_asm.asm",
-        "wipe.asm",
-    ];
-
-    let mut cc = cc::Build::new();
-    cc.include("upstream/inc").warnings(false);
-    for file in CMAKE_SOURCES_COMMON
-        .lines()
-        .filter(|line| !line.trim().is_empty())
-    {
-        cc.file(format!("{SOURCE_DIR}/{}", file.trim()));
+    #[allow(non_camel_case_types)]
+    #[derive(Debug, PartialEq, Eq)]
+    enum Triple {
+        x86_64_pc_windows_msvc,
+        aarch64_pc_windows_msvc,
+        x86_64_unknown_linux_gnu,
+        aarch64_unknown_linux_gnu,
     }
-    for file in COMMON_FILES {
-        cc.file(format!("{SOURCE_DIR}/{file}"));
-    }
-    for file in PLATFORM_FILES {
-        cc.file(format!("{SOURCE_DIR}/{file}"));
-    }
-    cc.files(MODULE_FILES);
 
-    #[cfg(all(windows, target_arch = "x86_64"))]
-    {
-        const ASM_DIR: &str = "upstream/lib/amd64/";
-        for file in ASM_FILES {
-            cc.asm_flag("/DSYMCRYPT_MASM");
-            cc.file(format!("{ASM_DIR}/{file}"));
+    impl Triple {
+        fn get_target_triple() -> Self {
+            let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
+            let target_arch = std::env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+
+            match (target_os.as_str(), target_arch.as_str()) {
+                ("windows", "x86_64") => Triple::x86_64_pc_windows_msvc,
+                ("windows", "aarch64") => Triple::aarch64_pc_windows_msvc,
+                ("linux", "x86_64") => Triple::x86_64_unknown_linux_gnu,
+                ("linux", "aarch64") => Triple::aarch64_unknown_linux_gnu,
+                _ => panic!("unsupported target. OS: {target_os}, Arch: {target_arch}"),
+            }
+        }
+        fn is_windows(&self) -> bool {
+            matches!(
+                self,
+                Triple::x86_64_pc_windows_msvc | Triple::aarch64_pc_windows_msvc
+            )
+        }
+        fn to_triple(&self) -> &'static str {
+            match self {
+                Triple::x86_64_pc_windows_msvc => "x86_64-pc-windows-msvc",
+                Triple::aarch64_pc_windows_msvc => "aarch64-pc-windows-msvc",
+                Triple::x86_64_unknown_linux_gnu => "x86_64-unknown-linux-gnu",
+                Triple::aarch64_unknown_linux_gnu => "aarch64-unknown-linux-gnu",
+            }
         }
     }
 
-    #[cfg(windows)]
-    cc.file(format!("{SOURCE_DIR}/IEEE802_11SaeCustom.c"));
-    #[cfg(all(not(windows), target_arch = "x86_64"))]
-    cc.file(format!("{SOURCE_DIR}/linux/intrinsics.c"));
+    const SOURCE_DIR: &str = "upstream/lib";
+    const CMAKE_SOURCES_COMMON: &str = "
+3des.c
+a_dispatch.c
+aes-asm.c
+aes-c.c
+aes-default-bc.c
+aes-default.c
+aes-key.c
+aes-neon.c
+aes-selftest.c
+aes-xmm.c
+aes-ymm.c
+aescmac.c
+aesCtrDrbg.c
+AesTables.c
+blockciphermodes.c
+ccm.c
+chacha20_poly1305.c
+chacha20.c
+cpuid_notry.c
+//cpuid_um.c
+cpuid.c
+crt.c
+DesTables.c
+desx.c
+dh.c
+dl_internal_groups.c
+dlgroup.c
+dlkey.c
+dsa.c
+ec_dh.c
+ec_dispatch.c
+ec_dsa.c
+ec_internal_curves.c
+ec_montgomery.c
+ec_mul.c
+ec_short_weierstrass.c
+ec_twisted_edwards.c
+eckey.c
+ecpoint.c
+ecurve.c
+equal.c
+FatalIntercept.c
+fdef_general.c
+fdef_int.c
+fdef_mod.c
+fdef369_mod.c
+fips_selftest.c
+gcm.c
+gen_int.c
+ghash.c
+hash.c
+hkdf_selftest.c
+hkdf.c
+hmac.c
+hmacmd5.c
+hmacsha1.c
+hmacsha256.c
+hmacsha384.c
+hmacsha512.c
+hmacsha3_256.c
+hmacsha3_384.c
+hmacsha3_512.c
+kmac.c
+libmain.c
+marvin32.c
+md2.c
+md4.c
+md5.c
+modexp.c
+paddingPkcs7.c
+parhash.c
+pbkdf2_hmacsha1.c
+pbkdf2_hmacsha256.c
+pbkdf2.c
+poly1305.c
+primes.c
+rc2.c
+rc4.c
+rdrand.c
+rdseed.c
+recoding.c
+rsa_enc.c
+rsa_padding.c
+rsakey.c
+ScsTable.c
+scsTools.c
+selftest.c
+session.c
+sha1.c
+sha256.c
+sha256Par.c
+sha256Par-ymm.c
+sha256-xmm.c
+sha256-ymm.c
+sha512.c
+sha512Par.c
+sha512Par-ymm.c
+sha512-ymm.c
+sha3.c
+sha3_256.c
+sha3_384.c
+sha3_512.c
+shake.c
+sp800_108_hmacsha1.c
+sp800_108_hmacsha256.c
+sp800_108_hmacsha512.c
+sp800_108.c
+srtp_kdf.c
+srtp_kdf_selftest.c
+ssh_kdf.c
+ssh_kdf_sha256.c
+ssh_kdf_sha512.c
+tlsCbcVerify.c
+tlsprf_selftest.c
+tlsprf.c
+xtsaes.c
+";
 
-    println!("Files to compile: {}", cc.get_files().count());
-    cc.compile(lib_name);
+    fn compile_symcrypt_static(lib_name: &str, triple: Triple) -> std::io::Result<()> {
+        let mut other_files = vec![
+            "env_generic.c", // symcrypt_generic
+        ];
+        let mut module_files = vec![];
 
-    Ok(())
+        if triple.is_windows() {
+            other_files.push("env_windowsUserModeWin7.c");
+            other_files.push("env_windowsUserModeWin8_1.c");
+            other_files.push("IEEE802_11SaeCustom.c");
+            module_files.push("upstream/modules/windows/user/module.c");
+        } else {
+            other_files.push("linux/intrinsics.c");
+        }
+
+        let asm_files = match triple {
+            Triple::x86_64_pc_windows_msvc => vec![
+                "amd64/aesasm.asm",
+                "amd64/fdef_asm.asm",
+                "amd64/fdef_mulx.asm",
+                "amd64/fdef369_asm.asm",
+                "amd64/sha256xmm_asm.asm",
+                "amd64/sha256ymm_asm.asm",
+                "amd64/sha512ymm_asm.asm",
+                "amd64/sha512ymm_avx512vl_asm.asm",
+                "amd64/wipe.asm",
+            ],
+            Triple::aarch64_pc_windows_msvc => vec![
+                "arm64/fdef_asm.asm",
+                "arm64/fdef369_asm.asm",
+                "arm64/wipe.asm",
+            ],
+            _ => vec![],
+        };
+
+        let mut cc = cc::Build::new();
+        cc.target(&triple.to_triple())
+            .include("upstream/inc")
+            .warnings(false);
+
+        for file in CMAKE_SOURCES_COMMON
+            .lines()
+            .filter(|line| !(line.trim().is_empty() || line.starts_with("//")))
+        {
+            cc.file(format!("{SOURCE_DIR}/{}", file.trim()));
+        }
+        for file in other_files {
+            cc.file(format!("{SOURCE_DIR}/{file}"));
+        }
+        for file in asm_files {
+            cc.file(format!("{SOURCE_DIR}/{file}"));
+        }
+        cc.files(module_files);        
+
+        if triple == Triple::x86_64_pc_windows_msvc {
+            cc.asm_flag("/DSYMCRYPT_MASM");
+        }
+
+        println!("Files to compile: {}", cc.get_files().count());
+        cc.compile(lib_name);
+
+        Ok(())
+    }
 }

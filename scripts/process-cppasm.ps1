@@ -45,6 +45,7 @@ if ($OutFormat -eq "gas") {
     & $clPath /EP /P `
         /I "$PSScriptRoot/../symcrypt-sys/upstream/inc" `
         /I "$PSScriptRoot/../symcrypt-sys/upstream/lib" `
+        /I "C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared" `
         "/D$CppAsmArch" `
         "/DSYMCRYPT_MASM" `
         "/Fi$OutputAsm" `
