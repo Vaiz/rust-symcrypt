@@ -134,7 +134,7 @@ bindgen `
 
 if ($triple.Contains("windows")) {
     Write-Host "Fixing bindings for Windows"
-    $linkStr = '#[link(name = "symcrypt", kind = "dylib")]'
+    $linkStr = '#[cfg_attr(feature = "dynamic", link(name = "symcrypt", kind = "dylib"))]'
     $regexExp1 = 'pub static \w+: \[SYMCRYPT_OID; \d+usize\];'
     $regexExp2 = 'pub static \w+: PCSYMCRYPT_\w+;'
     $bindingsContent = Get-Content $bindingsFile

@@ -9,7 +9,7 @@ fn main() -> std::io::Result<()> {
 }
 
 #[cfg(feature = "dynamic")]
-fn link_symcrypt_dynamicaly() -> std::io::Result<()> {  
+fn link_symcrypt_dynamicaly() -> std::io::Result<()> {
     #[cfg(target_os = "windows")]
     {
         // Look for the .lib file during link time. We are searching the Windows/System32 path which is set as a current default to match
@@ -49,25 +49,34 @@ fn link_symcrypt_dynamicaly() -> std::io::Result<()> {
         // Note: This process is a band-aid. Long-term, our long term solution is to package manage SymCrypt for a subset of
         // Linux distros.
     }
-     
 
     Ok(())
 }
 
 #[cfg(not(feature = "dynamic"))]
-fn compile_and_link_symcrypt() -> std::io::Result<()> {    // based on SymCrypt/lib/CMakeLists.txt
+fn compile_and_link_symcrypt() -> std::io::Result<()> {
+    // based on SymCrypt/lib/CMakeLists.txt
+
+    const ADDITIONAL_DEPENDENCIES: &[&str] = &[
+        #[cfg(windows)]
+        "bcrypt",
+    ];
     println!("cargo:rerun-if-changed=upstream");
     println!("Compiling SymCrypt...");
-    
+
     const LIB_NAME: &str = "symcrypt_static";
     compile_symcrypt_static(LIB_NAME)?;
     println!("cargo:rustc-link-lib=static={LIB_NAME}");
-    
+
+    for dep in ADDITIONAL_DEPENDENCIES {
+        println!("cargo:rustc-link-lib=dylib={dep}");
+    }
+
     Ok(())
 }
 
 #[cfg(not(feature = "dynamic"))]
-fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {    
+fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
     const SOURCE_DIR: &str = "upstream/lib";
     const CMAKE_SOURCES_COMMON: &str = "
     3des.c
@@ -191,10 +200,7 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
         "env_generic.c", // symcrypt_generic
     ];
     #[cfg(windows)]
-    const PLATFORM_FILES: &[&str] = &[
-        "env_windowsUserModeWin7.c",
-        "env_windowsUserModeWin8_1.c",
-    ];
+    const PLATFORM_FILES: &[&str] = &["env_windowsUserModeWin7.c", "env_windowsUserModeWin8_1.c"];
     #[cfg(not(windows))]
     const PLATFORM_FILES: &[&str] = &[];
 
@@ -219,7 +225,10 @@ fn compile_symcrypt_static(lib_name: &str) -> std::io::Result<()> {
 
     let mut cc = cc::Build::new();
     cc.include("upstream/inc").warnings(false);
-    for file in CMAKE_SOURCES_COMMON.lines().filter(|line| !line.trim().is_empty()) {
+    for file in CMAKE_SOURCES_COMMON
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+    {
         cc.file(format!("{SOURCE_DIR}/{}", file.trim()));
     }
     for file in COMMON_FILES {
