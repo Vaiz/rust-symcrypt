@@ -269,7 +269,22 @@ xtsaes.c
                 "arm64/fdef369_asm.asm",
                 "arm64/wipe.asm",
             ],
-            _ => vec![],
+            Triple::x86_64_unknown_linux_gnu => vec![
+                "amd64/aesasm-gas.asm",
+                "amd64/fdef_asm-gas.asm",
+                "amd64/fdef369_asm-gas.asm",
+                "amd64/fdef_mulx-gas.asm",
+                "amd64/wipe-gas.asm",
+                "amd64/sha256xmm_asm-gas.asm",
+                "amd64/sha256ymm_asm-gas.asm",
+                "amd64/sha512ymm_asm-gas.asm",
+                "amd64/sha512ymm_avx512vl_asm-gas.asm",
+            ],
+            Triple::aarch64_unknown_linux_gnu => vec![
+                "arm64/fdef_asm-gas.asm",
+                "arm64/fdef369_asm-gas.asm",
+                "arm64/wipe-gas.asm",
+            ],
         };
 
         let mut cc = cc::Build::new();
