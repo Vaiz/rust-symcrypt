@@ -50,4 +50,10 @@ $objects_to_keep = @(
     "LICENSE", "NOTICE", "README.md", "SECURITY.md", "VERSION", "version.json"
 )
 Get-ChildItem $destinationDir | Where-Object { $_.Name -notin $objects_to_keep } | Remove-Item -Recurse -Force
+
+$suffixes_to_remove = @("CMakeLists.txt", ".cppasm", ".symcryptasm", ".vcxproj")
+foreach ($suffix in $suffixes_to_remove) {
+    Get-ChildItem $destinationDir -Recurse -Filter *$suffix | Remove-Item -Recurse -Force
+}
+
 Remove-Item -Recurse -Force "$destinationDir/.git"
