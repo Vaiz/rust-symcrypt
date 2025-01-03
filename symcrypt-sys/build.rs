@@ -254,36 +254,36 @@ xtsaes.c
 
         let asm_files = match triple {
             Triple::x86_64_pc_windows_msvc => vec![
-                "amd64/aesasm.asm",
-                "amd64/fdef_asm.asm",
-                "amd64/fdef_mulx.asm",
-                "amd64/fdef369_asm.asm",
-                "amd64/sha256xmm_asm.asm",
-                "amd64/sha256ymm_asm.asm",
-                "amd64/sha512ymm_asm.asm",
-                "amd64/sha512ymm_avx512vl_asm.asm",
-                "amd64/wipe.asm",
+                "aesasm.asm",
+                "fdef_asm.asm",
+                "fdef_mulx.asm",
+                "fdef369_asm.asm",
+                "sha256xmm_asm.asm",
+                "sha256ymm_asm.asm",
+                "sha512ymm_asm.asm",
+                "sha512ymm_avx512vl_asm.asm",
+                "wipe.asm",
             ],
             Triple::aarch64_pc_windows_msvc => vec![
-                "arm64/fdef_asm.asm",
-                "arm64/fdef369_asm.asm",
-                "arm64/wipe.asm",
+                "fdef_asm.asm",
+                "fdef369_asm.asm",
+                "wipe.asm",
             ],
             Triple::x86_64_unknown_linux_gnu => vec![
-                "amd64/aesasm-gas.asm",
-                "amd64/fdef_asm-gas.asm",
-                "amd64/fdef369_asm-gas.asm",
-                "amd64/fdef_mulx-gas.asm",
-                "amd64/wipe-gas.asm",
-                "amd64/sha256xmm_asm-gas.asm",
-                "amd64/sha256ymm_asm-gas.asm",
-                "amd64/sha512ymm_asm-gas.asm",
-                "amd64/sha512ymm_avx512vl_asm-gas.asm",
+                "aesasm-gas.asm",
+                "fdef_asm-gas.asm",
+                "fdef369_asm-gas.asm",
+                "fdef_mulx-gas.asm",
+                "wipe-gas.asm",
+                "sha256xmm_asm-gas.asm",
+                "sha256ymm_asm-gas.asm",
+                "sha512ymm_asm-gas.asm",
+                "sha512ymm_avx512vl_asm-gas.asm",
             ],
             Triple::aarch64_unknown_linux_gnu => vec![
-                "arm64/fdef_asm-gas.asm",
-                "arm64/fdef369_asm-gas.asm",
-                "arm64/wipe-gas.asm",
+                "fdef_asm-gas.asm",
+                "fdef369_asm-gas.asm",
+                "wipe-gas.asm",
             ],
         };
 
@@ -302,7 +302,7 @@ xtsaes.c
             cc.file(format!("{SOURCE_DIR}/{file}"));
         }
         for file in asm_files {
-            cc.file(format!("{SOURCE_DIR}/{file}"));
+            cc.file(format!("{SOURCE_DIR}/asm/{}/{file}", triple.to_triple()));
         }
         cc.files(module_files);        
 

@@ -22,13 +22,18 @@ if ($ArchDefine -notin @("amd64", "x86", "arm64", "arm")) {
 }
 
 # Get directory and file name components
-$RootPath = [System.IO.Path]::GetDirectoryName($FilePath)
+$RootPath = [System.IO.Path]::GetDirectoryName([System.IO.Path]::GetDirectoryName($FilePath))
+$AsmDir = Join-Path $RootPath asm $TargetTriple
 $FileStem = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
 $CppAsmArch = "SYMCRYPT_CPU_" + $ArchDefine.ToUpper()
 if ($OutFormat -eq "gas") {
-    $OutputAsm = Join-Path $RootPath "$FileStem-gas.asm"
+    $OutputAsm = Join-Path $AsmDir "$FileStem-gas.asm"
 } else {
-    $OutputAsm = Join-Path $RootPath "$FileStem.asm"
+    $OutputAsm = Join-Path $AsmDir "$FileStem.asm"
+}
+
+if (-not (Test-Path $AsmDir)) {
+    New-Item -ItemType Directory -Path $AsmDir | Out-Null
 }
 
 Write-Output "Triple: $TargetTriple"
@@ -37,7 +42,7 @@ Write-Output "OutputAsm: $OutputAsm"
 # Preprocessing logic based on OutFormat
 if ($OutFormat -eq "gas") {
     # GCC-compatible C compiler
-    gcc -E -P -x c $FilePath `
+    clang -E -P -x c $FilePath `
         -o $OutputAsm `
         -D SYMCRYPT_GAS `
         -D $CppAsmArch `
@@ -60,4 +65,7 @@ if ($OutFormat -eq "gas") {
 }
 
 Write-Host "C preprocessing of $FilePath completed. Output: $OutputAsm"
-Remove-Item $FilePath
+
+if ($env:KEEP_CPPASM -ne "1") {    
+    Remove-Item $FilePath
+}
