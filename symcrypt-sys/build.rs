@@ -253,7 +253,9 @@ set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx
             .lines()
             .filter(|line| {
                 let line = line.trim();
-                !(line.is_empty() || line.starts_with("#") || already_compiled_files.contains(&line))
+                !(line.is_empty()
+                    || line.starts_with("#")
+                    || already_compiled_files.contains(&line))
             })
             .collect();
 
@@ -299,11 +301,8 @@ set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx
             }
         };
 
-        let mut cc = cc::Build::new();
-        cc.target(&triple.to_triple())
-            .include("upstream/inc")
-            .warnings(false)
-            .objects(intermediates);
+        let mut cc = preconfigure_cc(&triple);
+        cc.objects(intermediates);
 
         for file in base_files {
             cc.file(format!("{SOURCE_DIR}/{file}"));
@@ -312,13 +311,6 @@ set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx
             cc.file(format!("{SOURCE_DIR}/asm/{}/{file}", triple.to_triple()));
         }
         cc.files(module_files);
-
-        if triple == Triple::x86_64_pc_windows_msvc {
-            cc.asm_flag("/DSYMCRYPT_MASM");
-        }
-        if triple == Triple::aarch64_pc_windows_msvc {
-            cc.define("_ARM64_", None);
-        }
 
         println!("Files to compile: {}", cc.get_files().count());
         cc.compile(lib_name);
@@ -358,7 +350,7 @@ set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx
                 .split(';')
                 .filter(|s| !s.is_empty());
 
-            let mut cc = cc::Build::new();
+            let mut cc = preconfigure_cc(triple);
             cc.file(format!("{SOURCE_DIR}/{file}"));
             for option in options {
                 cc.flag(option);
@@ -370,5 +362,29 @@ set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx
         }
 
         (files, intermediates)
+    }
+
+    fn preconfigure_cc(triple: &Triple) -> cc::Build {
+        let mut cc = cc::Build::new();
+        cc.target(triple.to_triple())
+            .include("upstream/inc")
+            .warnings(false);
+
+        match *triple {
+            Triple::x86_64_pc_windows_msvc => {
+                cc.asm_flag("/DSYMCRYPT_MASM");
+            }
+            Triple::aarch64_pc_windows_msvc => {
+                cc.define("_ARM64_", None);
+            }
+            Triple::x86_64_unknown_linux_gnu => {
+                cc.flag("-mpclmul");
+            }
+            Triple::aarch64_unknown_linux_gnu => {
+                // nothing yet
+            }
+        }
+
+        cc
     }
 }
