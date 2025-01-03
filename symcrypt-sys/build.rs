@@ -238,18 +238,21 @@ xtsaes.c
 ";
 
     fn compile_symcrypt_static(lib_name: &str, triple: Triple) -> std::io::Result<()> {
-        let mut other_files = vec![
-            "env_generic.c", // symcrypt_generic
-        ];
+        let mut base_files: Vec<&'static str> = CMAKE_SOURCES_COMMON
+            .lines()
+            .filter(|line| !(line.trim().is_empty() || line.trim().starts_with("#")))
+            .collect();
+        base_files.push("env_generic.c"); // symcrypt_generic
+
         let mut module_files = vec![];
 
         if triple.is_windows() {
-            other_files.push("env_windowsUserModeWin7.c");
-            other_files.push("env_windowsUserModeWin8_1.c");
-            other_files.push("IEEE802_11SaeCustom.c");
+            base_files.push("env_windowsUserModeWin7.c");
+            base_files.push("env_windowsUserModeWin8_1.c");
+            base_files.push("IEEE802_11SaeCustom.c");
             module_files.push("upstream/modules/windows/user/module.c");
         } else {
-            other_files.push("linux/intrinsics.c");
+            base_files.push("linux/intrinsics.c");
         }
 
         let asm_files = match triple {
@@ -264,11 +267,7 @@ xtsaes.c
                 "sha512ymm_avx512vl_asm.asm",
                 "wipe.asm",
             ],
-            Triple::aarch64_pc_windows_msvc => vec![
-                "fdef_asm.asm",
-                "fdef369_asm.asm",
-                "wipe.asm",
-            ],
+            Triple::aarch64_pc_windows_msvc => vec!["fdef_asm.asm", "fdef369_asm.asm", "wipe.asm"],
             Triple::x86_64_unknown_linux_gnu => vec![
                 "aesasm-gas.asm",
                 "fdef_asm-gas.asm",
@@ -280,11 +279,9 @@ xtsaes.c
                 "sha512ymm_asm-gas.asm",
                 "sha512ymm_avx512vl_asm-gas.asm",
             ],
-            Triple::aarch64_unknown_linux_gnu => vec![
-                "fdef_asm-gas.asm",
-                "fdef369_asm-gas.asm",
-                "wipe-gas.asm",
-            ],
+            Triple::aarch64_unknown_linux_gnu => {
+                vec!["fdef_asm-gas.asm", "fdef369_asm-gas.asm", "wipe-gas.asm"]
+            }
         };
 
         let mut cc = cc::Build::new();
@@ -292,19 +289,13 @@ xtsaes.c
             .include("upstream/inc")
             .warnings(false);
 
-        for file in CMAKE_SOURCES_COMMON
-            .lines()
-            .filter(|line| !(line.trim().is_empty() || line.trim().starts_with("#")))
-        {
-            cc.file(format!("{SOURCE_DIR}/{}", file.trim()));
-        }
-        for file in other_files {
+        for file in base_files {
             cc.file(format!("{SOURCE_DIR}/{file}"));
         }
         for file in asm_files {
             cc.file(format!("{SOURCE_DIR}/asm/{}/{file}", triple.to_triple()));
         }
-        cc.files(module_files);        
+        cc.files(module_files);
 
         if triple == Triple::x86_64_pc_windows_msvc {
             cc.asm_flag("/DSYMCRYPT_MASM");
