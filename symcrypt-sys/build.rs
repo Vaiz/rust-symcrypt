@@ -237,11 +237,26 @@ tlsprf.c
 xtsaes.c
 ";
 
+    const SPECIAL_FLAGS: &str = r#"
+set_source_files_properties(aes-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2;-mvaes;-mvpclmulqdq")
+set_source_files_properties(sha256Par-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2")
+set_source_files_properties(sha512Par-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2")
+set_source_files_properties(sha256-xmm.c PROPERTIES COMPILE_OPTIONS "-mssse3")
+set_source_files_properties(sha256-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2;-mbmi2")
+set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2;-mbmi2")
+"#;
+
     fn compile_symcrypt_static(lib_name: &str, triple: Triple) -> std::io::Result<()> {
+        let (already_compiled_files, intermediates) = compile_intermediates(&triple);
+
         let mut base_files: Vec<&'static str> = CMAKE_SOURCES_COMMON
             .lines()
-            .filter(|line| !(line.trim().is_empty() || line.trim().starts_with("#")))
+            .filter(|line| {
+                let line = line.trim();
+                !(line.is_empty() || line.starts_with("#") || already_compiled_files.contains(&line))
+            })
             .collect();
+
         base_files.push("env_generic.c"); // symcrypt_generic
 
         let mut module_files = vec![];
@@ -287,7 +302,8 @@ xtsaes.c
         let mut cc = cc::Build::new();
         cc.target(&triple.to_triple())
             .include("upstream/inc")
-            .warnings(false);
+            .warnings(false)
+            .objects(intermediates);
 
         for file in base_files {
             cc.file(format!("{SOURCE_DIR}/{file}"));
@@ -308,5 +324,51 @@ xtsaes.c
         cc.compile(lib_name);
 
         Ok(())
+    }
+
+    fn compile_intermediates(triple: &Triple) -> (Vec<&'static str>, Vec<std::path::PathBuf>) {
+        let mut files = vec![];
+        let mut intermediates = vec![];
+
+        if *triple != Triple::x86_64_unknown_linux_gnu {
+            return (files, intermediates);
+        }
+
+        for line in SPECIAL_FLAGS.lines() {
+            if line.trim().is_empty() || line.trim().starts_with("#") {
+                continue;
+            }
+
+            let line = line
+                .strip_prefix("set_source_files_properties(")
+                .unwrap()
+                .strip_suffix(")")
+                .unwrap();
+
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            if parts.len() < 4 {
+                continue;
+            }
+
+            let file = parts[0];
+            println!("Compiling {file} with options: {}", parts[3]);
+
+            let options = parts[3]
+                .trim_matches('"')
+                .split(';')
+                .filter(|s| !s.is_empty());
+
+            let mut cc = cc::Build::new();
+            cc.file(format!("{SOURCE_DIR}/{file}"));
+            for option in options {
+                cc.flag(option);
+            }
+            let mut result = cc.compile_intermediates();
+
+            files.push(file);
+            intermediates.append(&mut result);
+        }
+
+        (files, intermediates)
     }
 }
