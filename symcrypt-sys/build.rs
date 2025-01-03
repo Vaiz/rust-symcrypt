@@ -138,7 +138,7 @@ ccm.c
 chacha20_poly1305.c
 chacha20.c
 cpuid_notry.c
-//cpuid_um.c
+cpuid_um.c
 cpuid.c
 crt.c
 DesTables.c
@@ -279,7 +279,7 @@ xtsaes.c
 
         for file in CMAKE_SOURCES_COMMON
             .lines()
-            .filter(|line| !(line.trim().is_empty() || line.starts_with("//")))
+            .filter(|line| !(line.trim().is_empty() || line.trim().starts_with("#")))
         {
             cc.file(format!("{SOURCE_DIR}/{}", file.trim()));
         }
@@ -293,6 +293,9 @@ xtsaes.c
 
         if triple == Triple::x86_64_pc_windows_msvc {
             cc.asm_flag("/DSYMCRYPT_MASM");
+        }
+        if triple == Triple::aarch64_pc_windows_msvc {
+            cc.define("_ARM64_", None);
         }
 
         println!("Files to compile: {}", cc.get_files().count());
