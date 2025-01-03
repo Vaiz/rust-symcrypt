@@ -2,7 +2,8 @@ param (
     [string]$FilePath,
     [string]$OutFormat,
     [string]$ArchDefine,
-    [string]$CallingConvention
+    [string]$CallingConvention,
+    [string]$TargetTriple
 )
 
 # Validate file extension
@@ -43,4 +44,4 @@ $symcryptasm_args = @(
 )
 Write-Output "Running: python $PythonScript $symcryptasm_args"
 & python $PythonScript @symcryptasm_args
-& "$PSScriptRoot/process-cppasm.ps1" $OutputCppAsm $OutFormat $ArchDefine
+& "$PSScriptRoot/process-cppasm.ps1" $OutputCppAsm $OutFormat $ArchDefine $TargetTriple

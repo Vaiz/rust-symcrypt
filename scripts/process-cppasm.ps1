@@ -1,7 +1,8 @@
 param (
     [string]$FilePath,
     [string]$OutFormat,
-    [string]$ArchDefine
+    [string]$ArchDefine,
+    [string]$TargetTriple
 )
 
 # Validate file extension
@@ -25,27 +26,28 @@ $RootPath = [System.IO.Path]::GetDirectoryName($FilePath)
 $FileStem = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
 $CppAsmArch = "SYMCRYPT_CPU_" + $ArchDefine.ToUpper()
 $OutputAsm = Join-Path $RootPath "$FileStem.asm"
+
+Write-Output "Triple: $TargetTriple"
 Write-Output "OutputAsm: $OutputAsm"
 
 # Preprocessing logic based on OutFormat
 if ($OutFormat -eq "gas") {
-    throw "gas outformat not implemented"
     # GCC-compatible C compiler
-    <#
-    $Command = @(
-        "gcc", "-E", "-P", "-x", "c", $FilePath, "-o", $OutputAsm,
-        @IncludeDirs, "-DSYMCRYPT_GAS", "-D$CppAsmArch", $DbgDefinition
-    )
-    Write-Host "Running GCC preprocessing: $($Command -join ' ')"
-    & $Command
-    #>
+    $gcc = "~\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.MSVCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20241217-msvcrt-x86_64\bin\gcc.EXE"
+    & $gcc -E -P -x c $FilePath `
+        -o $OutputAsm `
+        -D SYMCRYPT_GAS `
+        -D $CppAsmArch `
+        -I "$PSScriptRoot/../symcrypt-sys/upstream/inc" `
+        -I "$PSScriptRoot/../symcrypt-sys/upstream/lib" `
+        -target $TargetTriple
 } elseif ($OutFormat -in @("masm", "armasm64")) {
     # sourced from SymCrypt\msbuild\symcrypt.undocked.props
     $clPath = & "$PSScriptRoot/get-cl-path.ps1"
     & $clPath /EP /P `
         /I "$PSScriptRoot/../symcrypt-sys/upstream/inc" `
         /I "$PSScriptRoot/../symcrypt-sys/upstream/lib" `
-        /I "C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared" `
+        /I "C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared" `
         "/D$CppAsmArch" `
         "/DSYMCRYPT_MASM" `
         "/Fi$OutputAsm" `

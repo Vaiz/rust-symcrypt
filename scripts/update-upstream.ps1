@@ -23,19 +23,24 @@ python "$destinationDir/scripts/version.py" --build-info
 
 # WIN32_amd64
 $asmSettings = @(
-    @("$destinationDir/lib/amd64", "amd64", "masm", "msft"),
-    @("$destinationDir/lib/arm64", "arm64", "armasm64", "aapcs64")
+    @("x86_64-pc-windows-msvc", "$destinationDir/lib/amd64", "amd64", "masm", "msft"),
+    @("aarch64-pc-windows-msvc", "$destinationDir/lib/arm64", "arm64", "armasm64", "aapcs64")
+    @("x86_64-unknown-linux-gnu", "$destinationDir/lib/amd64", "amd64", "gas", "systemv"),
+    @("aarch64-unknown-linux-gnu","$destinationDir/lib/arm64", "arm64", "gas", "aapcs64")
 )
 
 foreach ($settings in $asmSettings) {
-    $dir = $settings[0]; $arch = $settings[1]; $outFormat = $settings[2]; $callingConvention = $settings[3]
+    $triple = $settings[0]; $dir = $settings[1]; $arch = $settings[2]; $outFormat = $settings[3]; 
+    $callingConvention = $settings[4]
+    
     $symcryptasm = Get-ChildItem $dir -Filter *.symcryptasm;
     foreach ($file in $symcryptasm) {
         & "$PSScriptRoot/process-symcryptasm.ps1" `
             -FilePath $file.FullName `
             -OutFormat $outFormat `
             -ArchDefine $arch `
-            -CallingConvention $callingConvention
+            -CallingConvention $callingConvention `
+            -TargetTriple $triple
     }
 }
 
