@@ -42,6 +42,6 @@ $symcryptasm_args = @(
     $FilePath,
     $OutputCppAsm
 )
-Write-Output "Running: python $PythonScript $symcryptasm_args"
-& python $PythonScript @symcryptasm_args
+Write-Output "Running: python3 $PythonScript $symcryptasm_args"
+& python3 $PythonScript @symcryptasm_args
 & "$PSScriptRoot/process-cppasm.ps1" $OutputCppAsm $OutFormat $ArchDefine $TargetTriple

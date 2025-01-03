@@ -19,7 +19,7 @@ git rev-parse HEAD >> "$destinationDir/VERSION"
 $tag >> "$destinationDir/VERSION"
 
 # TODO: move this logic to build.rs
-python "$destinationDir/scripts/version.py" --build-info
+python3 "$destinationDir/scripts/version.py" --build-info
 
 # WIN32_amd64
 $asmSettings = @(
