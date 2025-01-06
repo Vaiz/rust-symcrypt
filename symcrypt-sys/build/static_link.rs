@@ -19,7 +19,25 @@ pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
         println!("cargo:rustc-link-lib=dylib={dep}");
     }
 
+    if options.need_jitterentropy() {
+        compile_and_link_jitterentropy();
+    }
+
     Ok(())
+}
+
+fn compile_and_link_jitterentropy() {
+    println!("Compiling jitterentropy...");
+    let cargo_toml_dir = std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR is not set");
+    let jitterentropy_dir = format!("{cargo_toml_dir}/upstream/3rdparty/jitterentropy-library");
+    std::process::Command::new("make")
+        .arg("-C")
+        .arg(&jitterentropy_dir)
+        .status()
+        .expect("Failed to compile Jitterentropy");
+    
+    println!("cargo:rustc-link-search=native={jitterentropy_dir}");
+    println!("cargo:rustc-link-lib=static=libjitterentropy");
 }
 
 #[derive(Debug)]
@@ -41,6 +59,9 @@ impl SymCryptOptions {
     }
     fn triple(&self) -> Triple {
         self.triple.clone()
+    }
+    fn need_jitterentropy(&self) -> bool {
+        self.triple == Triple::x86_64_unknown_linux_gnu
     }
 
     fn preconfigure_cc(&self) -> cc::Build {
@@ -77,6 +98,10 @@ impl SymCryptOptions {
             Triple::aarch64_unknown_linux_gnu => {
                 // nothing yet
             }
+        }
+        
+        if self.need_jitterentropy() {
+            cc.include("upstream/3rdparty/jitterentropy-library");
         }
 
         cc
