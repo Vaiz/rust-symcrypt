@@ -15,9 +15,16 @@ if (Test-Path $destinationDir) {
 git clone --branch $tag --depth 1 $repoUrl $destinationDir
 git -C $destinationDir submodule update --init -- 3rdparty/jitterentropy-library
 
-git -C $destinationDir config --get remote.origin.url > "$destinationDir/VERSION"
-git -C $destinationDir rev-parse HEAD >> "$destinationDir/VERSION"
-$tag >> "$destinationDir/VERSION"
+# VERSION file
+$versionFile = Join-Path $destinationDir "VERSION"
+"SymCrypt" > $versionFile
+git -C $destinationDir config --get remote.origin.url >> $versionFile
+git -C $destinationDir rev-parse HEAD >> $versionFile
+$tag >> $versionFile
+"" >> $versionFile
+"jitterentropy" >> $versionFile
+git -C $destinationDir/3rdparty/jitterentropy-library config --get remote.origin.url >> $versionFile
+git -C $destinationDir/3rdparty/jitterentropy-library rev-parse HEAD >> $versionFile
 
 # TODO: move this logic to build.rs
 python3 "$destinationDir/scripts/version.py" --build-info
