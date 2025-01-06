@@ -62,6 +62,15 @@ impl SymCryptOptions {
             }
             Triple::x86_64_unknown_linux_gnu => {
                 cc.flag("-mpclmul");
+                /*
+                cc.flag("-mpclmul")
+                    .flag("-mssse3")
+                    .flag("-mxsave")
+                    .flag("-maes")
+                    .flag("-msha")
+                    .flag("-mrdrnd")
+                    .flag("-mrdseed");
+                */
             }
             Triple::aarch64_unknown_linux_gnu => {
                 // nothing yet
@@ -302,7 +311,10 @@ fn compile_symcrypt_static(lib_name: &str, options: SymCryptOptions) -> std::io:
 
     if options.use_asm() {
         for file in asm_files {
-            cc.file(format!("{SOURCE_DIR}/asm/{}/{file}", options.triple.to_triple()));
+            cc.file(format!(
+                "{SOURCE_DIR}/asm/{}/{file}",
+                options.triple.to_triple()
+            ));
         }
     }
     cc.files(module_files);
