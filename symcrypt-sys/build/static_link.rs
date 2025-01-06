@@ -47,6 +47,7 @@ impl SymCryptOptions {
         let mut cc = cc::Build::new();
         cc.target(self.triple.to_triple())
             .include("upstream/inc")
+            .include("upstream/lib")
             .warnings(false);
 
         if !self.symcrypt_use_asm {
