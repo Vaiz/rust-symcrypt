@@ -1,8 +1,8 @@
 pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     // based on SymCrypt/lib/CMakeLists.txt
 
-    let target_triple = Triple::get_target_triple();
-    println!("Target triple: {}", target_triple.to_triple());
+    let options = SymCryptOptions::new();
+    println!("Build config: {:?}", options);
 
     const ADDITIONAL_DEPENDENCIES: &[&str] = &[
         #[cfg(windows)]
@@ -12,7 +12,7 @@ pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     println!("Compiling SymCrypt...");
 
     const LIB_NAME: &str = "symcrypt_static";
-    compile_symcrypt_static(LIB_NAME, target_triple)?;
+    compile_symcrypt_static(LIB_NAME, options)?;
     println!("cargo:rustc-link-lib=static={LIB_NAME}");
 
     for dep in ADDITIONAL_DEPENDENCIES {
@@ -22,8 +22,58 @@ pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     Ok(())
 }
 
+#[derive(Debug)]
+struct SymCryptOptions {
+    triple: Triple,
+    symcrypt_use_asm: bool,
+    //symcrypt_fips_build: bool,
+}
+impl SymCryptOptions {
+    fn new() -> Self {
+        Self {
+            triple: Triple::get_target_triple(),
+            symcrypt_use_asm: true,
+            //symcrypt_fips_build: false,
+        }
+    }
+    fn use_asm(&self) -> bool {
+        self.symcrypt_use_asm
+    }
+    fn triple(&self) -> Triple {
+        self.triple.clone()
+    }
+
+    fn preconfigure_cc(&self) -> cc::Build {
+        let mut cc = cc::Build::new();
+        cc.target(self.triple.to_triple())
+            .include("upstream/inc")
+            .warnings(false);
+
+        if !self.symcrypt_use_asm {
+            cc.define("SYMCRYPT_IGNORE_PLATFORM", None);
+        }
+
+        match self.triple {
+            Triple::x86_64_pc_windows_msvc => {
+                cc.asm_flag("/DSYMCRYPT_MASM");
+            }
+            Triple::aarch64_pc_windows_msvc => {
+                cc.define("_ARM64_", None);
+            }
+            Triple::x86_64_unknown_linux_gnu => {
+                cc.flag("-mpclmul");
+            }
+            Triple::aarch64_unknown_linux_gnu => {
+                // nothing yet
+            }
+        }
+
+        cc
+    }
+}
+
 #[allow(non_camel_case_types)]
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 enum Triple {
     x86_64_pc_windows_msvc,
     aarch64_pc_windows_msvc,
@@ -180,6 +230,7 @@ tlsprf.c
 xtsaes.c
 ";
 
+// only for x86_64_unknown_linux_gnu
 const SPECIAL_FLAGS: &str = r#"
 set_source_files_properties(aes-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2;-mvaes;-mvpclmulqdq")
 set_source_files_properties(sha256Par-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2")
@@ -189,16 +240,14 @@ set_source_files_properties(sha256-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx
 set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2;-mbmi2")
 "#;
 
-fn compile_symcrypt_static(lib_name: &str, triple: Triple) -> std::io::Result<()> {
-    let (already_compiled_files, intermediates) = compile_intermediates(&triple);
+fn compile_symcrypt_static(lib_name: &str, options: SymCryptOptions) -> std::io::Result<()> {
+    let (already_compiled_files, intermediates) = compile_intermediates(&options);
 
     let mut base_files: Vec<&'static str> = CMAKE_SOURCES_COMMON
         .lines()
         .filter(|line| {
             let line = line.trim();
-            !(line.is_empty()
-                || line.starts_with("#")
-                || already_compiled_files.contains(&line))
+            !(line.is_empty() || line.starts_with("#") || already_compiled_files.contains(&line))
         })
         .collect();
 
@@ -206,7 +255,7 @@ fn compile_symcrypt_static(lib_name: &str, triple: Triple) -> std::io::Result<()
 
     let mut module_files = vec![];
 
-    if triple.is_windows() {
+    if options.triple().is_windows() {
         base_files.push("env_windowsUserModeWin7.c");
         base_files.push("env_windowsUserModeWin8_1.c");
         base_files.push("IEEE802_11SaeCustom.c");
@@ -215,7 +264,7 @@ fn compile_symcrypt_static(lib_name: &str, triple: Triple) -> std::io::Result<()
         base_files.push("linux/intrinsics.c");
     }
 
-    let asm_files = match triple {
+    let asm_files = match options.triple() {
         Triple::x86_64_pc_windows_msvc => vec![
             "aesasm.asm",
             "fdef_asm.asm",
@@ -244,14 +293,17 @@ fn compile_symcrypt_static(lib_name: &str, triple: Triple) -> std::io::Result<()
         }
     };
 
-    let mut cc = preconfigure_cc(&triple);
+    let mut cc = options.preconfigure_cc();
     cc.objects(intermediates);
 
     for file in base_files {
         cc.file(format!("{SOURCE_DIR}/{file}"));
     }
-    for file in asm_files {
-        cc.file(format!("{SOURCE_DIR}/asm/{}/{file}", triple.to_triple()));
+
+    if options.use_asm() {
+        for file in asm_files {
+            cc.file(format!("{SOURCE_DIR}/asm/{}/{file}", options.triple.to_triple()));
+        }
     }
     cc.files(module_files);
 
@@ -261,11 +313,13 @@ fn compile_symcrypt_static(lib_name: &str, triple: Triple) -> std::io::Result<()
     Ok(())
 }
 
-fn compile_intermediates(triple: &Triple) -> (Vec<&'static str>, Vec<std::path::PathBuf>) {
+fn compile_intermediates(
+    symcrypt_options: &SymCryptOptions,
+) -> (Vec<&'static str>, Vec<std::path::PathBuf>) {
     let mut files = vec![];
     let mut intermediates = vec![];
 
-    if *triple != Triple::x86_64_unknown_linux_gnu {
+    if symcrypt_options.triple() != Triple::x86_64_unknown_linux_gnu {
         return (files, intermediates);
     }
 
@@ -293,7 +347,7 @@ fn compile_intermediates(triple: &Triple) -> (Vec<&'static str>, Vec<std::path::
             .split(';')
             .filter(|s| !s.is_empty());
 
-        let mut cc = preconfigure_cc(triple);
+        let mut cc = symcrypt_options.preconfigure_cc();
         cc.file(format!("{SOURCE_DIR}/{file}"));
         for option in options {
             cc.flag(option);
@@ -305,28 +359,4 @@ fn compile_intermediates(triple: &Triple) -> (Vec<&'static str>, Vec<std::path::
     }
 
     (files, intermediates)
-}
-
-fn preconfigure_cc(triple: &Triple) -> cc::Build {
-    let mut cc = cc::Build::new();
-    cc.target(triple.to_triple())
-        .include("upstream/inc")
-        .warnings(false);
-
-    match *triple {
-        Triple::x86_64_pc_windows_msvc => {
-            cc.asm_flag("/DSYMCRYPT_MASM");
-        }
-        Triple::aarch64_pc_windows_msvc => {
-            cc.define("_ARM64_", None);
-        }
-        Triple::x86_64_unknown_linux_gnu => {
-            cc.flag("-mpclmul");
-        }
-        Triple::aarch64_unknown_linux_gnu => {
-            // nothing yet
-        }
-    }
-
-    cc
 }

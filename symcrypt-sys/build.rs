@@ -56,4 +56,3 @@ fn link_symcrypt_dynamicaly() -> std::io::Result<()> {
 
     Ok(())
 }
-
