@@ -1,3 +1,5 @@
+use std::path::Path;
+
 pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     // based on SymCrypt/lib/CMakeLists.txt
 
@@ -20,24 +22,48 @@ pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     }
 
     if options.need_jitterentropy() {
-        compile_and_link_jitterentropy();
+        compile_and_link_jitterentropy()?;
     }
 
     Ok(())
 }
 
-fn compile_and_link_jitterentropy() {
+fn compile_and_link_jitterentropy() -> std::io::Result<()> {
     println!("Compiling jitterentropy...");
-    let cargo_toml_dir = std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR is not set");
+    let cargo_toml_dir =
+        std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR is not set");
     let jitterentropy_dir = format!("{cargo_toml_dir}/upstream/3rdparty/jitterentropy-library");
-    std::process::Command::new("make")
+    let new_path = format!("{}/jitterentropy", std::env::var("OUT_DIR").unwrap());
+
+    // this helps to keep source directory clean
+    copy_dir_all(jitterentropy_dir, &new_path)?;
+    let status = std::process::Command::new("make")
         .arg("-C")
-        .arg(&jitterentropy_dir)
-        .status()
-        .expect("Failed to compile Jitterentropy");
-    
-    println!("cargo:rustc-link-search=native={jitterentropy_dir}");
-    println!("cargo:rustc-link-lib=static=libjitterentropy");
+        .arg(&new_path)
+        .status()?;
+
+    if !status.success() {
+        return Err(std::io::Error::other("Failed to compile jitterentropy"));
+    }
+
+    println!("cargo:rustc-link-search=native={new_path}");
+    println!("cargo:rustc-link-lib=static=jitterentropy");
+
+    Ok(())
+}
+
+fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result<()> {
+    std::fs::create_dir_all(&dst)?;
+    for entry in std::fs::read_dir(src)? {
+        let entry = entry?;
+        let ty = entry.file_type()?;
+        if ty.is_dir() {
+            copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        } else {
+            std::fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        }
+    }
+    Ok(())
 }
 
 #[derive(Debug)]
@@ -99,7 +125,7 @@ impl SymCryptOptions {
                 // nothing yet
             }
         }
-        
+
         if self.need_jitterentropy() {
             cc.include("upstream/3rdparty/jitterentropy-library");
         }
@@ -291,7 +317,7 @@ fn compile_symcrypt_static(lib_name: &str, options: &SymCryptOptions) -> std::io
             base_files.push("env_windowsUserModeWin8_1.c");
             base_files.push("IEEE802_11SaeCustom.c");
             module_files.push("upstream/modules/windows/user/module.c");
-        },
+        }
         Triple::x86_64_unknown_linux_gnu => {
             base_files.push("linux/intrinsics.c");
             base_files.push("env_linuxUserMode.c");
@@ -304,16 +330,16 @@ fn compile_symcrypt_static(lib_name: &str, options: &SymCryptOptions) -> std::io
             module_files.push("upstream/modules/linux/common/optional/module_linuxUserMode.c");
             module_files.push("upstream/modules/linux/common/callbacks_pthread.c");
 
-            // Enable integrity verification if compiling for AMD64 or ARM64 or ARM            
+            // Enable integrity verification if compiling for AMD64 or ARM64 or ARM
             module_files.push("upstream/modules/linux/common/integrity.c");
 
             // symcrypt_module_linux_common
             module_files.push("upstream/modules/linux/common/module.c");
             module_files.push("upstream/modules/linux/common/rng.c");
-        },
+        }
         Triple::aarch64_unknown_linux_gnu => {
             // nothing yet
-        },
+        }
     }
 
     let asm_files = match options.triple() {
