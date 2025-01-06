@@ -268,6 +268,7 @@ fn compile_symcrypt_static(lib_name: &str, options: SymCryptOptions) -> std::io:
         },
         Triple::x86_64_unknown_linux_gnu => {
             base_files.push("linux/intrinsics.c");
+            base_files.push("env_linuxUserMode.c");
             // symcrypt_module_linux_common            
             module_files.push("upstream/modules/linux/common/optional/module_linuxUserMode.c");
             module_files.push("upstream/modules/linux/common/module.c");
