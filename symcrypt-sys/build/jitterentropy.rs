@@ -52,7 +52,7 @@ pub fn compile_and_link_jitterentropy(triple: Triple) {
     }
 
     cc.compile(LIB_NAME);
-    println!("cargo:rustc-link-lib=static=jitterentropy");
+    println!("cargo:rustc-link-lib=static={LIB_NAME}");
 }
 
 fn gcc_version_ge_490() -> bool {
