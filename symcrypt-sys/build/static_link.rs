@@ -32,7 +32,7 @@ impl SymCryptOptions {
     fn new() -> Self {
         Self {
             triple: Triple::get_target_triple(),
-            symcrypt_use_asm: true,
+            symcrypt_use_asm: false,
             //symcrypt_fips_build: false,
         }
     }
