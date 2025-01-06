@@ -12,7 +12,7 @@ pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     println!("Compiling SymCrypt...");
 
     const LIB_NAME: &str = "symcrypt_static";
-    compile_symcrypt_static(LIB_NAME, options)?;
+    compile_symcrypt_static(LIB_NAME, &options)?;
     println!("cargo:rustc-link-lib=static={LIB_NAME}");
 
     for dep in ADDITIONAL_DEPENDENCIES {
@@ -270,7 +270,7 @@ set_source_files_properties(sha256-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx
 set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2;-mbmi2")
 "#;
 
-fn compile_symcrypt_static(lib_name: &str, options: SymCryptOptions) -> std::io::Result<()> {
+fn compile_symcrypt_static(lib_name: &str, options: &SymCryptOptions) -> std::io::Result<()> {
     let (already_compiled_files, intermediates) = compile_intermediates(&options);
 
     let mut base_files: Vec<&'static str> = CMAKE_SOURCES_COMMON
