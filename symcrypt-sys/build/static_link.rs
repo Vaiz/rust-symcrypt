@@ -103,12 +103,6 @@ impl Triple {
             _ => panic!("unsupported target. OS: {target_os}, Arch: {target_arch}"),
         }
     }
-    fn is_windows(&self) -> bool {
-        matches!(
-            self,
-            Triple::x86_64_pc_windows_msvc | Triple::aarch64_pc_windows_msvc
-        )
-    }
     fn to_triple(&self) -> &'static str {
         match self {
             Triple::x86_64_pc_windows_msvc => "x86_64-pc-windows-msvc",
@@ -271,10 +265,10 @@ fn compile_symcrypt_static(lib_name: &str, options: SymCryptOptions) -> std::io:
             base_files.push("IEEE802_11SaeCustom.c");
             module_files.push("upstream/modules/windows/user/module.c");
         },
-        Triple::x86_64_unknown_linux_gnu {
+        Triple::x86_64_unknown_linux_gnu => {
             base_files.push("linux/intrinsics.c");
         },
-        Triple::aarch64_unknown_linux_gnu {
+        Triple::aarch64_unknown_linux_gnu => {
             // nothing yet
         },
     }
