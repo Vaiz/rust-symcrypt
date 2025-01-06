@@ -264,13 +264,19 @@ fn compile_symcrypt_static(lib_name: &str, options: SymCryptOptions) -> std::io:
 
     let mut module_files = vec![];
 
-    if options.triple().is_windows() {
-        base_files.push("env_windowsUserModeWin7.c");
-        base_files.push("env_windowsUserModeWin8_1.c");
-        base_files.push("IEEE802_11SaeCustom.c");
-        module_files.push("upstream/modules/windows/user/module.c");
-    } else {
-        base_files.push("linux/intrinsics.c");
+    match options.triple() {
+        Triple::x86_64_pc_windows_msvc | Triple::aarch64_pc_windows_msvc => {
+            base_files.push("env_windowsUserModeWin7.c");
+            base_files.push("env_windowsUserModeWin8_1.c");
+            base_files.push("IEEE802_11SaeCustom.c");
+            module_files.push("upstream/modules/windows/user/module.c");
+        },
+        Triple::x86_64_unknown_linux_gnu {
+            base_files.push("linux/intrinsics.c");
+        },
+        Triple::aarch64_unknown_linux_gnu {
+            // nothing yet
+        },
     }
 
     let asm_files = match options.triple() {
