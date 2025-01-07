@@ -34,7 +34,7 @@ jobs:
             run-tests: false
             
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.target }}    
+    name: ${{ matrix.target }} ${{ matrix.dynamic-feature && ' (dynamic)' || '' }}
     env:
       CARGO_BUILD_TARGET: ${{ matrix.target }}
     
