@@ -50,7 +50,7 @@ impl SymCryptOptions {
         self.triple.clone()
     }
     fn need_jitterentropy(&self) -> bool {
-        self.triple == Triple::x86_64_unknown_linux_gnu
+        matches!(self.triple, Triple::x86_64_unknown_linux_gnu | Triple::aarch64_unknown_linux_gnu)
     }
 
     fn preconfigure_cc(&self) -> cc::Build {
@@ -85,7 +85,7 @@ impl SymCryptOptions {
                 */
             }
             Triple::aarch64_unknown_linux_gnu => {
-                // nothing yet
+                cc.include("upstream/modules/linux/common");
             }
         }
 
@@ -269,7 +269,22 @@ fn compile_symcrypt_static(lib_name: &str, options: &SymCryptOptions) -> std::io
             module_files.push("upstream/modules/linux/common/rng.c");
         }
         Triple::aarch64_unknown_linux_gnu => {
-            // nothing yet
+            base_files.push("env_linuxUserMode.c");
+
+            // generic
+            module_files.push("upstream/modules/linux/generic/statusindicator.c");
+            module_files.push("upstream/modules/linux/common/optional/rngfipsjitter.c");
+            module_files.push("upstream/modules/linux/common/optional/rngforkdetection.c");
+            module_files.push("upstream/modules/linux/common/optional/rngsecureurandom.c");
+            module_files.push("upstream/modules/linux/common/optional/module_linuxUserMode.c");
+            module_files.push("upstream/modules/linux/common/callbacks_pthread.c");
+
+            // Enable integrity verification if compiling for AMD64 or ARM64 or ARM
+            module_files.push("upstream/modules/linux/common/integrity.c");
+
+            // symcrypt_module_linux_common
+            module_files.push("upstream/modules/linux/common/module.c");
+            module_files.push("upstream/modules/linux/common/rng.c");
         }
     }
 
