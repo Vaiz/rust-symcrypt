@@ -19,3 +19,12 @@ extern crate libc;
 mod bindings;
 
 pub use bindings::*;
+
+
+pub fn is_dynamic_link() -> bool {
+    #[cfg(feature = "dynamic")]
+    return true;
+    
+    #[cfg(not(feature = "dynamic"))]
+    return false;
+}
