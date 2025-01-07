@@ -37,12 +37,54 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "symcrypt"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8707d81bffaf1a95015e79a94c5c7056c06ecba6774a3beef347a384e822ea65"
+dependencies = [
+ "lazy_static",
+ "libc",
+ "symcrypt-sys 0.3.0",
+]
+
+[[package]]
+name = "symcrypt"
 version = "0.5.0"
 dependencies = [
  "hex",
  "lazy_static",
  "libc",
  "symcrypt-sys 0.4.0",
+]
+
+[[package]]
+name = "symcrypt"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "150283079003a75c9d76ab8532bb516ca213d10a2955d5641ad41a9884154c8a"
+dependencies = [
+ "lazy_static",
+ "libc",
+ "symcrypt-sys 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "symcrypt"
+version = "0.6.0"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#79dacba2c19499ed8d9dd46063b04243758f58b9"
+dependencies = [
+ "lazy_static",
+ "libc",
+ "symcrypt-sys 0.6.0",
+]
+
+[[package]]
+name = "symcrypt"
+version = "0.7.0"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#c194441629a58e04fc991fdcfc1e36c409bdcd13"
+dependencies = [
+ "lazy_static",
+ "libc",
+ "symcrypt-sys 0.7.0",
 ]
 
 [[package]]
@@ -93,6 +135,10 @@ dependencies = [
 name = "test-symcrypt"
 version = "0.1.0"
 dependencies = [
+ "symcrypt 0.4.0",
+ "symcrypt 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "symcrypt 0.6.0",
+ "symcrypt 0.7.0",
  "symcrypt-sys 0.3.0",
  "symcrypt-sys 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "symcrypt-sys 0.6.0",
