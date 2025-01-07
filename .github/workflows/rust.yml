@@ -14,6 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        dynamic-feature: [false, true]
         include:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
@@ -51,6 +52,7 @@ jobs:
 
     - name: Download SymCrypt
       shell: pwsh
+      if: matrix.dynamic-feature
       run: |
         $dir = $(Get-Item .).FullName
         if ("${{ matrix.symcrypt }}" -match "\.tar\.gz$") {
@@ -70,12 +72,20 @@ jobs:
         }
 
     - name: Build
-      run: cargo build --verbose --target ${{ matrix.target }}
+      shell: pwsh
+      run: |
+        if ("${{ matrix.dynamic-feature }}" -eq "true") {
+          cargo build --verbose --target ${{ matrix.target }} --features dynamic
+        } else {
+          cargo build --verbose --target ${{ matrix.target }}
+        }
 
     - name: Run tests
       if: matrix.run-tests
       shell: pwsh
       run: |
-        Write-Output "SYMCRYPT_LIB_PATH=$env:SYMCRYPT_LIB_PATH"
-        Write-Output "PATH=$env:PATH"
-        cargo test --verbose --target ${{ matrix.target }}
+        if ("${{ matrix.dynamic-feature }}" -eq "true") {
+          cargo test --verbose --target ${{ matrix.target }} --features dynamic
+        } else {
+          cargo test --verbose --target ${{ matrix.target }}
+        }
