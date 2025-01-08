@@ -15,3 +15,4 @@ symcrypt-04 = { package = "symcrypt", version = "0.4.0"}
 symcrypt-05 = { package = "symcrypt", version = "0.5.0"}
 symcrypt-06 = { package = "symcrypt", version = "0.6.0", git = "https://github.com/Vaiz/rust-symcrypt.git", branch = "tests/0.6" }
 symcrypt-07 = { package = "symcrypt", version = "0.7.0", git = "https://github.com/Vaiz/rust-symcrypt.git", branch = "tests/0.7" }
+symcrypt-08 = { package = "symcrypt", version = "0.8.0", git = "https://github.com/Vaiz/rust-symcrypt.git", branch = "tests/0.8" }

@@ -70,7 +70,7 @@ dependencies = [
 [[package]]
 name = "symcrypt"
 version = "0.6.0"
-source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#2f4e32de3b87a21182a9a9e4e3b63bb3cb921c6e"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#b986b8c86fe665b78a1acb363af736dd64c5af4d"
 dependencies = [
  "lazy_static",
  "libc",
@@ -80,11 +80,21 @@ dependencies = [
 [[package]]
 name = "symcrypt"
 version = "0.7.0"
-source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#513221428907923073145efc2d38134f92d25a92"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#d817f4ec25d0fd3df9fc62a54b118d73e1ee1406"
 dependencies = [
  "lazy_static",
  "libc",
  "symcrypt-sys 0.7.0",
+]
+
+[[package]]
+name = "symcrypt"
+version = "0.8.0"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.8#30113adac3ece8e00a15739d9d6c7de1d3660e10"
+dependencies = [
+ "lazy_static",
+ "libc",
+ "symcrypt-sys 0.8.0",
 ]
 
 [[package]]
@@ -116,7 +126,7 @@ dependencies = [
 [[package]]
 name = "symcrypt-sys"
 version = "0.6.0"
-source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#2f4e32de3b87a21182a9a9e4e3b63bb3cb921c6e"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#b986b8c86fe665b78a1acb363af736dd64c5af4d"
 dependencies = [
  "cc",
  "libc",
@@ -125,7 +135,16 @@ dependencies = [
 [[package]]
 name = "symcrypt-sys"
 version = "0.7.0"
-source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#513221428907923073145efc2d38134f92d25a92"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#d817f4ec25d0fd3df9fc62a54b118d73e1ee1406"
+dependencies = [
+ "cc",
+ "libc",
+]
+
+[[package]]
+name = "symcrypt-sys"
+version = "0.8.0"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.8#30113adac3ece8e00a15739d9d6c7de1d3660e10"
 dependencies = [
  "cc",
  "libc",
@@ -139,6 +158,7 @@ dependencies = [
  "symcrypt 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "symcrypt 0.6.0",
  "symcrypt 0.7.0",
+ "symcrypt 0.8.0",
  "symcrypt-sys 0.6.0",
  "symcrypt-sys 0.7.0",
 ]
