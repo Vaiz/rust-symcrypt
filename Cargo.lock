@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "cc"
-version = "1.2.6"
+version = "1.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d6dbb628b8f8555f86d0323c2eb39e3ec81901f4b83e091db8a6a76d316a333"
+checksum = "a012a0df96dd6d06ba9a1b29d6402d1a5d77c6befd2566afdc26e10603dc93d7"
 dependencies = [
  "shlex",
 ]
@@ -70,7 +70,7 @@ dependencies = [
 [[package]]
 name = "symcrypt"
 version = "0.6.0"
-source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#79dacba2c19499ed8d9dd46063b04243758f58b9"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#2f4e32de3b87a21182a9a9e4e3b63bb3cb921c6e"
 dependencies = [
  "lazy_static",
  "libc",
@@ -80,7 +80,7 @@ dependencies = [
 [[package]]
 name = "symcrypt"
 version = "0.7.0"
-source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#c194441629a58e04fc991fdcfc1e36c409bdcd13"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#513221428907923073145efc2d38134f92d25a92"
 dependencies = [
  "lazy_static",
  "libc",
@@ -116,7 +116,7 @@ dependencies = [
 [[package]]
 name = "symcrypt-sys"
 version = "0.6.0"
-source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#79dacba2c19499ed8d9dd46063b04243758f58b9"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#2f4e32de3b87a21182a9a9e4e3b63bb3cb921c6e"
 dependencies = [
  "cc",
  "libc",
@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "symcrypt-sys"
 version = "0.7.0"
-source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#c194441629a58e04fc991fdcfc1e36c409bdcd13"
+source = "git+https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#513221428907923073145efc2d38134f92d25a92"
 dependencies = [
  "cc",
  "libc",
