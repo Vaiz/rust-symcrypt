@@ -26,6 +26,15 @@ fn symcrypt_init() {
     }
 }
 
+pub fn symcrypt_build_info() -> &'static str {
+    symcrypt_init();
+    unsafe {
+        // SAFETY: FFI calls
+        let version_info = symcrypt_sys::SymCryptBuildInfo();
+        std::ffi::CStr::from_ptr(version_info).to_str().unwrap()
+    }
+}
+
 /// Takes in a a buffer called `buff` and fills it with random bytes. This function cannot fail.
 pub fn symcrypt_random(buff: &mut [u8]) {
     symcrypt_init();
@@ -72,5 +81,10 @@ mod test {
         symcrypt_random(&mut buff_2);
 
         assert_ne!(buff_1, buff_2);
+    }
+
+    #[test]
+    fn print_build_info() {
+        println!("Symcrypt build info: {}", symcrypt_build_info());
     }
 }

@@ -46,6 +46,7 @@ pub const _SYMCRYPT_ECURVE_TYPE_SYMCRYPT_ECURVE_TYPE_TWISTED_EDWARDS: _SYMCRYPT_
 pub const _SYMCRYPT_ECURVE_TYPE_SYMCRYPT_ECURVE_TYPE_MONTGOMERY: _SYMCRYPT_ECURVE_TYPE = 3;
 pub type _SYMCRYPT_ECURVE_TYPE = ::std::os::raw::c_int;
 pub use self::_SYMCRYPT_ECURVE_TYPE as SYMCRYPT_ECURVE_TYPE;
+pub type CHAR = ::std::os::raw::c_char;
 pub type UINT8 = ::std::os::raw::c_uchar;
 pub type BYTE = ::std::os::raw::c_uchar;
 pub type UINT32 = ::std::os::raw::c_uint;
@@ -60,41 +61,7 @@ pub type PCUINT64 = *const UINT64;
 pub type PVOID = *mut ::std::os::raw::c_void;
 pub type PCVOID = *const ::std::os::raw::c_void;
 pub type BOOLEAN = BYTE;
-#[repr(C)]
-#[repr(align(16))]
-#[derive(Copy, Clone)]
-pub union __m128i {
-    pub m128i_i8: [::std::os::raw::c_char; 16usize],
-    pub m128i_i16: [::std::os::raw::c_short; 8usize],
-    pub m128i_i32: [::std::os::raw::c_int; 4usize],
-    pub m128i_i64: [::std::os::raw::c_longlong; 2usize],
-    pub m128i_u8: [::std::os::raw::c_uchar; 16usize],
-    pub m128i_u16: [::std::os::raw::c_ushort; 8usize],
-    pub m128i_u32: [::std::os::raw::c_uint; 4usize],
-    pub m128i_u64: [::std::os::raw::c_ulonglong; 2usize],
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of __m128i"][::std::mem::size_of::<__m128i>() - 16usize];
-    ["Alignment of __m128i"][::std::mem::align_of::<__m128i>() - 16usize];
-    ["Offset of field: __m128i::m128i_i8"][::std::mem::offset_of!(__m128i, m128i_i8) - 0usize];
-    ["Offset of field: __m128i::m128i_i16"][::std::mem::offset_of!(__m128i, m128i_i16) - 0usize];
-    ["Offset of field: __m128i::m128i_i32"][::std::mem::offset_of!(__m128i, m128i_i32) - 0usize];
-    ["Offset of field: __m128i::m128i_i64"][::std::mem::offset_of!(__m128i, m128i_i64) - 0usize];
-    ["Offset of field: __m128i::m128i_u8"][::std::mem::offset_of!(__m128i, m128i_u8) - 0usize];
-    ["Offset of field: __m128i::m128i_u16"][::std::mem::offset_of!(__m128i, m128i_u16) - 0usize];
-    ["Offset of field: __m128i::m128i_u32"][::std::mem::offset_of!(__m128i, m128i_u32) - 0usize];
-    ["Offset of field: __m128i::m128i_u64"][::std::mem::offset_of!(__m128i, m128i_u64) - 0usize];
-};
-impl Default for __m128i {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
+pub type __m128i = [::std::os::raw::c_longlong; 2usize];
 pub type SYMCRYPT_BLOCKCIPHER = _SYMCRYPT_BLOCKCIPHER;
 pub type PCSYMCRYPT_BLOCKCIPHER = *const SYMCRYPT_BLOCKCIPHER;
 #[repr(C)]
@@ -1941,6 +1908,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn SymCryptModuleInit(api: UINT32, minor: UINT32);
+}
+unsafe extern "C" {
+    pub fn SymCryptBuildInfo() -> *const CHAR;
 }
 unsafe extern "C" {
     pub fn SymCryptMd5(pbData: PCBYTE, cbData: SIZE_T, pbResult: PBYTE);

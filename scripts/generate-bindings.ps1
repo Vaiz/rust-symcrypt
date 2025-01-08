@@ -81,7 +81,8 @@ $importRules = @(
 @("allowlist_function", "SymCryptWipe"),
 @("allowlist_function", "SymCryptRandom"),
 @("allowlist_function", "SymCryptLoadMsbFirstUint64"),
-@("allowlist_function", "SymCryptStoreMsbFirstUint64")
+@("allowlist_function", "SymCryptStoreMsbFirstUint64"),
+@("allowlist_function", "SymCryptBuildInfo")
 )
 
 $generateVarsParams = @()

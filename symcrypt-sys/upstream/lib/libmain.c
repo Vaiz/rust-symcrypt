@@ -32,11 +32,23 @@ SymCryptLibraryWasNotInitialized(void)
 
 #endif
 
+#ifndef SYMCRYPT_BUILD_INFO_EXTRA
+#define SYMCRYPT_BUILD_INFO_EXTRA ""
+#endif
+
 const CHAR * const SymCryptBuildString =
         "v" SYMCRYPT_BUILD_INFO_VERSION
         "_" SYMCRYPT_BUILD_INFO_BRANCH
         "_" SYMCRYPT_BUILD_INFO_COMMIT
-        "_" SYMCRYPT_BUILD_INFO_TIMESTAMP;
+        "_" SYMCRYPT_BUILD_INFO_TIMESTAMP
+        "_" SYMCRYPT_BUILD_INFO_EXTRA;
+
+
+const CHAR*
+SYMCRYPT_CALL
+SymCryptBuildInfo(void) {
+    return SymCryptBuildString;
+}
 
 VOID
 SYMCRYPT_CALL
