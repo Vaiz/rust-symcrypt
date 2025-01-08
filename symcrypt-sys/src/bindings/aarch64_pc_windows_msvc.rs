@@ -46,6 +46,7 @@ pub const _SYMCRYPT_ECURVE_TYPE_SYMCRYPT_ECURVE_TYPE_TWISTED_EDWARDS: _SYMCRYPT_
 pub const _SYMCRYPT_ECURVE_TYPE_SYMCRYPT_ECURVE_TYPE_MONTGOMERY: _SYMCRYPT_ECURVE_TYPE = 3;
 pub type _SYMCRYPT_ECURVE_TYPE = ::std::os::raw::c_int;
 pub use self::_SYMCRYPT_ECURVE_TYPE as SYMCRYPT_ECURVE_TYPE;
+pub type CHAR = ::std::os::raw::c_char;
 pub type UINT8 = ::std::os::raw::c_uchar;
 pub type BYTE = ::std::os::raw::c_uchar;
 pub type UINT32 = ::std::os::raw::c_uint;
@@ -2029,6 +2030,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn SymCryptModuleInit(api: UINT32, minor: UINT32);
+}
+unsafe extern "C" {
+    pub fn SymCryptBuildInfo() -> *const CHAR;
 }
 unsafe extern "C" {
     pub fn SymCryptMd5(pbData: PCBYTE, cbData: SIZE_T, pbResult: PBYTE);

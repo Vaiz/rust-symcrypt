@@ -534,6 +534,11 @@ SymCryptModuleInit(
 // the macro SYMCRYPT_MODULE_INIT should be used to call it with the correct arguments.
 //
 
+const CHAR*
+SYMCRYPT_CALL
+SymCryptBuildInfo(void);
+
+
 //==========================================================================
 //   DATA MANIPULATION
 //==========================================================================

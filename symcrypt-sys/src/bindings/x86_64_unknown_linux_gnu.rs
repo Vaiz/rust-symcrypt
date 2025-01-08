@@ -52,6 +52,7 @@ pub type UINT8 = u8;
 pub type UINT32 = u32;
 pub type UINT64 = u64;
 pub type PUINT64 = *mut u64;
+pub type CHAR = ::std::os::raw::c_char;
 pub type PBYTE = *mut BYTE;
 pub type PCBYTE = *const BYTE;
 pub type PCUINT32 = *const UINT32;
@@ -1905,6 +1906,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn SymCryptModuleInit(api: UINT32, minor: UINT32);
+}
+unsafe extern "C" {
+    pub fn SymCryptBuildInfo() -> *const CHAR;
 }
 unsafe extern "C" {
     pub fn SymCryptMd5(pbData: PCBYTE, cbData: SIZE_T, pbResult: PBYTE);
