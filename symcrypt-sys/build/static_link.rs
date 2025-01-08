@@ -58,6 +58,7 @@ impl SymCryptOptions {
         cc.target(self.triple.to_triple())
             .include("upstream/inc")
             .include("upstream/lib")
+            .define("SYMCRYPT_BUILD_INFO_EXTRA", "\"Rust-static-test/0.6\"")
             .warnings(false);
 
         if !self.symcrypt_use_asm {
