@@ -6,8 +6,8 @@ license = "MIT OR Apache-2.0"
 edition = "2021"
 
 [dependencies]
-symcrypt-sys-03 = { package = "symcrypt-sys", version = "0.3.0"}
-symcrypt-sys-04 = { package = "symcrypt-sys", version = "0.4.0"}
+#symcrypt-sys-03 = { package = "symcrypt-sys", version = "0.3.0"}
+#symcrypt-sys-04 = { package = "symcrypt-sys", version = "0.4.0"}
 symcrypt-sys-06 = { package = "symcrypt-sys", version = "0.6.0", git = "https://github.com/Vaiz/rust-symcrypt.git", branch = "tests/0.6" }
 symcrypt-sys-07 = { package = "symcrypt-sys", version = "0.7.0", git = "https://github.com/Vaiz/rust-symcrypt.git", branch = "tests/0.7", features = ["dynamic"] }
 

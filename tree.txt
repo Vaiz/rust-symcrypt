@@ -12,15 +12,29 @@ symcrypt v0.5.0 (C:\dev\rust-symcrypt\rust-symcrypt)
 symcrypt-sys v0.4.0 (C:\dev\rust-symcrypt\symcrypt-sys) (*)
 
 test-symcrypt v0.1.0 (C:\dev\rust-symcrypt\test-symcrypt)
-├── symcrypt-sys v0.3.0
-│   └── libc v0.2.169
-├── symcrypt-sys v0.4.0
-│   └── libc v0.2.169
-├── symcrypt-sys v0.6.0 (https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#79dacba2)
-│   └── libc v0.2.169
-│   [build-dependencies]
-│   └── cc v1.2.6 (*)
-└── symcrypt-sys v0.7.0 (https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#c1944416)
-    └── libc v0.2.169
-    [build-dependencies]
-    └── cc v1.2.6 (*)
+├── symcrypt v0.4.0
+│   ├── lazy_static v1.5.0
+│   ├── libc v0.2.169
+│   └── symcrypt-sys v0.3.0
+│       └── libc v0.2.169
+├── symcrypt v0.5.0
+│   ├── lazy_static v1.5.0
+│   ├── libc v0.2.169
+│   └── symcrypt-sys v0.4.0
+│       └── libc v0.2.169
+├── symcrypt v0.6.0 (https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#79dacba2)
+│   ├── lazy_static v1.5.0
+│   ├── libc v0.2.169
+│   └── symcrypt-sys v0.6.0 (https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#79dacba2)
+│       └── libc v0.2.169
+│       [build-dependencies]
+│       └── cc v1.2.6 (*)
+├── symcrypt v0.7.0 (https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#c1944416)
+│   ├── lazy_static v1.5.0
+│   ├── libc v0.2.169
+│   └── symcrypt-sys v0.7.0 (https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#c1944416)
+│       └── libc v0.2.169
+│       [build-dependencies]
+│       └── cc v1.2.6 (*)
+├── symcrypt-sys v0.6.0 (https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.6#79dacba2) (*)
+└── symcrypt-sys v0.7.0 (https://github.com/Vaiz/rust-symcrypt.git?branch=tests%2F0.7#c1944416) (*)
