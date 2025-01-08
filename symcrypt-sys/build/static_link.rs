@@ -14,9 +14,8 @@ pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     println!("cargo:rerun-if-changed=upstream");
     println!("Compiling SymCrypt...");
 
-    const LIB_NAME: &str = "symcrypt_static";
-    compile_symcrypt_static(LIB_NAME, &options)?;
-    println!("cargo:rustc-link-lib=static={LIB_NAME}");
+    compile_symcrypt_static(&options)?;
+    println!("cargo:rustc-link-lib=static={}", options.lib_name());
 
     for dep in ADDITIONAL_DEPENDENCIES {
         println!("cargo:rustc-link-lib=dylib={dep}");
@@ -34,6 +33,7 @@ struct SymCryptOptions {
     triple: Triple,
     symcrypt_use_asm: bool,
     //symcrypt_fips_build: bool,
+    pkg_version: String,
 }
 impl SymCryptOptions {
     fn new() -> Self {
@@ -41,6 +41,7 @@ impl SymCryptOptions {
             triple: Triple::get_target_triple(),
             symcrypt_use_asm: false,
             //symcrypt_fips_build: false,
+            pkg_version: env!("CARGO_PKG_VERSION").to_string(),
         }
     }
     fn use_asm(&self) -> bool {
@@ -52,13 +53,16 @@ impl SymCryptOptions {
     fn need_jitterentropy(&self) -> bool {
         matches!(self.triple, Triple::x86_64_unknown_linux_gnu | Triple::aarch64_unknown_linux_gnu)
     }
+    fn lib_name(&self) -> String {
+        format!("symcrypt_static_{}", self.pkg_version)
+    }
 
     fn preconfigure_cc(&self) -> cc::Build {
         let mut cc = cc::Build::new();
         cc.target(self.triple.to_triple())
             .include("upstream/inc")
             .include("upstream/lib")
-            .define("SYMCRYPT_BUILD_INFO_EXTRA", "\"Rust-static-test/0.7\"")
+            .define("SYMCRYPT_BUILD_INFO_EXTRA", format!("\"Rust-static-test/{}\"", self.pkg_version).as_str())
             .warnings(false);
 
         if !self.symcrypt_use_asm {
@@ -228,7 +232,7 @@ set_source_files_properties(sha256-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx
 set_source_files_properties(sha512-ymm.c PROPERTIES COMPILE_OPTIONS "-mavx;-mavx2;-mbmi2")
 "#;
 
-fn compile_symcrypt_static(lib_name: &str, options: &SymCryptOptions) -> std::io::Result<()> {
+fn compile_symcrypt_static(options: &SymCryptOptions) -> std::io::Result<()> {
     let (already_compiled_files, intermediates) = compile_intermediates(&options);
 
     let mut base_files: Vec<&'static str> = CMAKE_SOURCES_COMMON
@@ -336,7 +340,7 @@ fn compile_symcrypt_static(lib_name: &str, options: &SymCryptOptions) -> std::io
     cc.files(module_files);
 
     println!("Files to compile: {}", cc.get_files().count());
-    cc.compile(lib_name);
+    cc.compile(options.lib_name().as_str());
 
     Ok(())
 }
