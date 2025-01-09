@@ -1,13 +1,10 @@
 #[cfg(not(feature = "dynamic"))]
-#[path = "build/static_link.rs"]
 pub mod static_link;
 
 #[cfg(not(feature = "dynamic"))]
-#[path = "build/triple.rs"]
 pub mod triple;
 
 #[cfg(not(feature = "dynamic"))]
-#[path = "build/jitterentropy.rs"]
 pub mod jitterentropy;
 
 fn main() -> std::io::Result<()> {
