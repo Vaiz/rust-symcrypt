@@ -27,8 +27,6 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     name: Bindgen ${{ matrix.target }}
-    env:
-      CARGO_BUILD_TARGET: ${{ matrix.target }}
 
     steps:
     - uses: actions/checkout@v4
@@ -45,7 +43,7 @@ jobs:
       shell: pwsh
       run: |
         ./scripts/generate-bindings.ps1 -triple ${{ matrix.target }} -outDir ${{ runner.temp }}
-        $targetName = $triple.Replace("-", "_")
+        $targetName = ${{ matrix.target }}.Replace("-", "_")
         $newBindingsFile = "${{ runner.temp }}/$targetName.rs"
         $oldBindingsFile = "./symcrypt-sys/src/bindings/$targetName.rs"
         $diff = diff $newBindingsFile $oldBindingsFile
