@@ -7,15 +7,22 @@
 
 [CmdletBinding()]
 param(
-    [string]$SymCryptHeader = "$PSScriptRoot/../../SymCrypt/inc/symcrypt.h",
-    [Parameter(HelpMessage="Current triple can be found by running 'clang -print-target-triple'")]
-    [string]$triple
+    [Parameter(Mandatory, HelpMessage="Current triple can be found by running 'clang -print-target-triple'")]
+    [string]$triple,
+    [Parameter(Mandatory, HelpMessage="Output directory for the generated bindings")]
+    [string]$outDir
 )
 
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $True
 
 # Init variables
+$SymCryptSysCrate = "$PSScriptRoot/../symcrypt-sys"
+$SymCryptSysCrate = $SymCryptSysCrate.Replace("\", "/")
+$wrapperHeader = "$SymCryptSysCrate/bindgen/wrapper.h"
+$targetName = $triple.Replace("-", "_")
+$bindingsFile = "$outDir/$targetName.rs"
+
 $supportedTargets = @(
     "x86_64-pc-windows-msvc",
     "aarch64-pc-windows-msvc",
@@ -112,20 +119,20 @@ $bindgenParams = @(
 )
 $clangParams = @(
     "-v",
-    "-target", $triple
+    "-target", $triple,
+    "-I$SymCryptSysCrate/symcrypt/inc",
+    "-I$SymCryptSysCrate/symcrypt/lib"
 )
 
 # Generate bindings
-$outDir = "$PSScriptRoot/../symcrypt-sys/src/bindings"
 if (-not (Test-Path $outDir)) {
     New-Item -ItemType Directory -Path $outDir | Out-Null
 }
 
-$targetName = $triple.Replace("-", "_")
-$bindingsFile = "$outDir/$targetName.rs"
+python3 "$SymCryptSysCrate/symcrypt/scripts/version.py" --build-info
 
 bindgen `
-    $SymCryptHeader `
+    $wrapperHeader `
     @bindgenParams `
     @generateVarsParams `
     @generateFunctionsParams `
