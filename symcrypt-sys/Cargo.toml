@@ -12,11 +12,16 @@ readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
+default = ["static"]
+static = ["dep:jitterentropy-sys2"]
 dynamic = []
 
 [dependencies]
 libc = "0.2.0"
 
+[target.'cfg(os = "linux")'.dependencies]
+jitterentropy-sys2 = { version = "0.1", git = "https://github.com/Vaiz/rust-symcrypt.git", branch = "jitterentropy", optional = true}
+
 [build-dependencies]
 #cc = { version = "1.2.4", features = ["parallel"] }
-cc = { version = "1.2.4" }
+cc = { version = "1.2.7" }

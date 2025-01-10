@@ -1,5 +1,5 @@
 use super::triple::Triple;
-use super::jitterentropy::compile_and_link_jitterentropy;
+//use super::jitterentropy::compile_and_link_jitterentropy;
 
 pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     // based on SymCrypt/lib/CMakeLists.txt
@@ -23,7 +23,7 @@ pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     }
 
     if options.need_jitterentropy() {
-        compile_and_link_jitterentropy(options.triple());
+        //compile_and_link_jitterentropy(options.triple());
     }
 
     Ok(())
