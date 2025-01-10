@@ -42,8 +42,10 @@ jobs:
           sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
         }
 
-    - name: Install bindgen
-      run: cargo install bindgen-cli --version ${{ env.BINDGEN_VERSION }}
+    - uses: taiki-e/cache-cargo-install-action@v2
+      name: Install bindgen
+      with:
+        tool: bindgen-cli@${{ env.BINDGEN_VERSION }}
 
     - name: Compare generated bindings
       shell: pwsh
@@ -52,7 +54,7 @@ jobs:
         $targetName = "${{ matrix.target }}".Replace("-", "_")
         $newBindingsFile = "${{ runner.temp }}/$targetName.rs"
         $oldBindingsFile = "./symcrypt-sys/src/bindings/$targetName.rs"
-        $diff = diff $newBindingsFile $oldBindingsFile
+        $diff = git diff --no-index $newBindingsFile $oldBindingsFile
         if ($diff) {
           Write-Output "Bindings have changed"
           Write-Output $diff
