@@ -19,8 +19,8 @@ dynamic = []
 [dependencies]
 libc = "0.2.0"
 
-[target.'cfg(os = "linux")'.dependencies]
-jitterentropy-sys2 = { version = "0.1", git = "https://github.com/Vaiz/rust-symcrypt.git", branch = "jitterentropy", optional = true}
+[target.'cfg(target_os = "linux")'.dependencies]
+jitterentropy-sys2 = { version = "0.1", git = "https://github.com/Vaiz/rust-symcrypt.git", branch = "jitterentropy", optional = true }
 
 [build-dependencies]
 #cc = { version = "1.2.4", features = ["parallel"] }
