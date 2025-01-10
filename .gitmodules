@@ -5,9 +5,9 @@
 	ignore = all
 	recurseSubmodules = false
 
-#[submodule "SymCrypt"]
-#	path = symcrypt-sys/symcrypt
-#	url = https://github.com/microsoft/SymCrypt.git
-#	shallow = true
-#	ignore = all
-#	recurseSubmodules = false
+[submodule "SymCrypt"]
+	path = symcrypt-sys/symcrypt
+	url = https://github.com/microsoft/SymCrypt.git
+	shallow = true
+	ignore = all
+	recurseSubmodules = false
