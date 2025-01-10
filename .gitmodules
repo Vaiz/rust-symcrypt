@@ -1,3 +1,6 @@
+[submodule "Jitterentropy"]
+	path = jitterentropy-sys2/jitterentropy
+	url = https://github.com/smuellerDD/jitterentropy-library.git
 [submodule "SymCrypt"]
 	path = symcrypt-sys/symcrypt
 	url = https://github.com/microsoft/SymCrypt.git
