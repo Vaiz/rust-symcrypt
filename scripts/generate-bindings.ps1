@@ -19,7 +19,7 @@ $PSNativeCommandUseErrorActionPreference = $True
 # Init variables
 $SymCryptSysCrate = "$PSScriptRoot/../symcrypt-sys"
 $SymCryptSysCrate = $SymCryptSysCrate.Replace("\", "/")
-$wrapperHeader = "$SymCryptSysCrate/bindgen/wrapper.h"
+$wrapperHeader = "$SymCryptSysCrate/inc/wrapper.h"
 $targetName = $triple.Replace("-", "_")
 $bindingsFile = "$outDir/$targetName.rs"
 
@@ -119,7 +119,8 @@ $bindgenParams = @(
 )
 $clangParams = @(
     "-v",
-    "-target", $triple,
+    "-target", $triple,    
+    "-I$SymCryptSysCrate/inc/lib",
     "-I$SymCryptSysCrate/symcrypt/inc",
     "-I$SymCryptSysCrate/symcrypt/lib"
 )
@@ -128,8 +129,6 @@ $clangParams = @(
 if (-not (Test-Path $outDir)) {
     New-Item -ItemType Directory -Path $outDir | Out-Null
 }
-
-python3 "$SymCryptSysCrate/symcrypt/scripts/version.py" --build-info
 
 bindgen `
     $wrapperHeader `

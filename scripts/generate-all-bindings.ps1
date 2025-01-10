@@ -17,6 +17,9 @@ $PSNativeCommandUseErrorActionPreference = $True
 
 Push-Location "$PSScriptRoot/.." # Move to the root of the project
 
+python3 "./symcrypt-sys/symcrypt/scripts/version.py" --build-info
+mv -Force "./symcrypt-sys/symcrypt/inc/buildInfo.h" "./symcrypt-sys/inc/"
+
 $bindingsDir = "./symcrypt-sys/src/bindings" # is relative to the project root
 if (Test-Path $bindingsDir) {
     Remove-Item -Recurse -Force "$bindingsDir"
