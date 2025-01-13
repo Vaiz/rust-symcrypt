@@ -11,3 +11,4 @@
 	shallow = true
 	ignore = all
 	recurseSubmodules = false
+	update = none
