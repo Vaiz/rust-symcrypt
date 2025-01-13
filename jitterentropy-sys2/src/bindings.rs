@@ -2,6 +2,10 @@
 
 use super::handwriten::*;
 
+pub const JENT_MAJVERSION: u32 = 3;
+pub const JENT_MINVERSION: u32 = 6;
+pub const JENT_PATCHLEVEL: u32 = 1;
+pub const JENT_VERSION: u32 = 3060100;
 unsafe extern "C" {
     pub fn jent_read_entropy(
         ec: *mut rand_data,
