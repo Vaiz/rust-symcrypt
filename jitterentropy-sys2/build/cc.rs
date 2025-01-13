@@ -1,10 +1,8 @@
-pub fn compile_and_link_jitterentropy() {
+pub fn compile_and_link_jitterentropy(jitterentropy_dir: &str) {
     const LIB_NAME: &str = "jitterentropy";
 
     println!("Compiling jitterentropy...");
     let triple = std::env::var("TARGET").expect("TARGET not set");
-    let cargo_toml_dir = env!("CARGO_MANIFEST_DIR");
-    let jitterentropy_dir = format!("{cargo_toml_dir}/jitterentropy");
 
     let mut cc = cc::Build::new();
     cc
