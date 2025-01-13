@@ -12,9 +12,9 @@ $allowedFunctions = @(
 $clangArgs = @("+A")
 
 $bindgenArgs = @(
+    "--raw-line", "use super::handwriten::*;",
     "--ignore-methods",
-    "--allowlist-type", "rand_data",
-    "--opaque-type", "rand_data"
+    "--blocklist-type", "rand_data"    
 )
 foreach ($function in $allowedFunctions) {
     $bindgenArgs += "--allowlist-function"
