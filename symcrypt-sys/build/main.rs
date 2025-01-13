@@ -4,9 +4,6 @@ pub mod static_link;
 #[cfg(not(feature = "dynamic"))]
 pub mod triple;
 
-//#[cfg(not(feature = "dynamic"))]
-//pub mod jitterentropy;
-
 fn main() -> std::io::Result<()> {
     #[cfg(feature = "dynamic")]
     link_symcrypt_dynamicaly()?;

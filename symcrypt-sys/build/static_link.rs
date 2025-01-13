@@ -1,5 +1,4 @@
 use super::triple::Triple;
-//use super::jitterentropy::compile_and_link_jitterentropy;
 
 pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     // based on SymCrypt/lib/CMakeLists.txt
@@ -23,7 +22,7 @@ pub fn compile_and_link_symcrypt() -> std::io::Result<()> {
     }
 
     if options.need_jitterentropy() {
-        //compile_and_link_jitterentropy(options.triple());
+        println!("cargo:rustc-link-lib=static=jitterentropy");
     }
 
     Ok(())
@@ -90,7 +89,8 @@ impl SymCryptOptions {
         }
 
         if self.need_jitterentropy() {
-            cc.include("upstream/3rdparty/jitterentropy-library");
+            let include_path = std::env::var_os("DEP_JITTERENTROPY_INCLUDE").expect("DEP_JITTERENTROPY_INCLUDE is not set");
+            cc.include(include_path);
         }
 
         cc
