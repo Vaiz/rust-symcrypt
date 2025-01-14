@@ -13,5 +13,5 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Linelint
-      uses: actions/linelint@master
+      uses: fernandrone/linelint@0.0.6
       id: linelint
